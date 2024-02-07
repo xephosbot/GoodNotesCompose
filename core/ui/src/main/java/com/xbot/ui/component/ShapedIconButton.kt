@@ -1,0 +1,97 @@
+package com.xbot.ui.component
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.minimumInteractiveComponentSize
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun ShapedIconButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    colors: ShapedIconButtonColors = ShapedIconButtonDefaults.shapedIconButtonColors(),
+    shape: Shape = ShapedIconButtonDefaults.shape,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    content: @Composable () -> Unit
+) {
+    Box(
+        modifier = modifier
+            .minimumInteractiveComponentSize()
+            .size(ShapedIconButtonDefaults.Size)
+            .clip(shape)
+            .background(color = colors.containerColor(enabled).value)
+            .clickable(
+                onClick = onClick,
+                enabled = enabled,
+                role = Role.Button,
+                interactionSource = interactionSource,
+                indication = rememberRipple(
+                    bounded = true
+                )
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        val contentColor = colors.contentColor(enabled).value
+        CompositionLocalProvider(LocalContentColor provides contentColor, content = content)
+    }
+}
+
+object ShapedIconButtonDefaults {
+
+    val Size = 72.dp
+
+    val shape: Shape @Composable get() = MaterialTheme.shapes.extraSmall
+
+    private const val DisabledIconOpacity = 0.38f
+
+    @Composable
+    fun shapedIconButtonColors(
+        containerColor: Color = Color.Transparent,
+        contentColor: Color = LocalContentColor.current,
+        disabledContainerColor: Color = Color.Transparent,
+        disabledContentColor: Color = containerColor.copy(alpha = DisabledIconOpacity)
+    ): ShapedIconButtonColors = ShapedIconButtonColors(
+        containerColor = containerColor,
+        contentColor = contentColor,
+        disabledContainerColor = disabledContainerColor,
+        disabledContentColor = disabledContentColor
+    )
+}
+
+@Immutable
+class ShapedIconButtonColors(
+    private val containerColor: Color,
+    private val contentColor: Color,
+    private val disabledContainerColor: Color,
+    private val disabledContentColor: Color
+) {
+
+    @Composable
+    internal fun containerColor(enabled: Boolean): State<Color> {
+        return rememberUpdatedState(if (enabled) containerColor else disabledContainerColor)
+    }
+
+    @Composable
+    internal fun contentColor(enabled: Boolean): State<Color> {
+        return rememberUpdatedState(if (enabled) contentColor else disabledContentColor)
+    }
+}

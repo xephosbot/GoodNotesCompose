@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name" translatable="false">GoodNotes</string>
+    <string name="my_notes_title">My\nNotes</string>
+</resources>

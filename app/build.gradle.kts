@@ -1,0 +1,81 @@
+plugins {
+    alias(libs.plugins.xbot.android.application)
+    alias(libs.plugins.xbot.android.application.compose)
+    alias(libs.plugins.xbot.android.hilt)
+}
+
+android {
+    namespace = "com.xbot.goodnotes"
+
+    defaultConfig {
+        applicationId = "com.xbot.goodnotes.compose"
+        versionCode = 1
+        versionName = "1.0"
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables {
+            useSupportLibrary = true
+        }
+    }
+
+    signingConfigs {
+        named("debug") {
+            storeFile = rootProject.file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "xbot"
+            keyPassword = "android"
+        }
+    }
+
+    buildTypes {
+        debug {
+            signingConfig = signingConfigs.getByName("debug")
+        }
+        release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            signingConfig = signingConfigs.getByName("debug")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
+
+    packaging {
+        resources {
+            excludes.add("/META-INF/{AL2.0,LGPL2.1}")
+        }
+    }
+}
+
+dependencies {
+    // Project-level dependencies
+    implementation(project(":core:ui"))
+    implementation(project(":core:shared-element"))
+    implementation(project(":domain"))
+    implementation(project(":data"))
+
+    // Kotlin dependencies
+    implementation(libs.kotlinx.datetime)
+
+    // AndroidX dependencies
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.runtimeCompose)
+    implementation(libs.androidx.lifecycle.viewModelCompose)
+
+    // Compose dependencies
+    implementation(libs.androidx.compose.runtime)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+
+    // Testing dependencies
+    androidTestImplementation(libs.androidx.test.espresso.core)
+    androidTestImplementation(libs.androidx.test.ext)
+    androidTestImplementation(libs.androidx.compose.ui.test)
+
+    // Debug dependencies
+    debugImplementation(libs.androidx.compose.ui.testManifest)
+    debugImplementation(libs.androidx.compose.ui.tooling)
+}
