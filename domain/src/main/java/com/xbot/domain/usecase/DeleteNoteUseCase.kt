@@ -7,7 +7,7 @@ import javax.inject.Inject
 class DeleteNoteUseCase @Inject constructor(
     private val repository: NoteRepository
 ) {
-    suspend operator fun invoke(notes: List<NoteModel>, folderId: Long = 0L) {
-        notes.forEach { repository.deleteNote(it, folderId) }
+    suspend operator fun invoke(note: NoteModel, folderId: Long = 0L) {
+        repository.deleteNote(note, folderId)
     }
 }

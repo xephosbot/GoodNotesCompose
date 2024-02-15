@@ -11,13 +11,13 @@ import kotlinx.datetime.toLocalDateTime
 import java.time.format.DateTimeFormatter
 
 internal fun NoteModel.mapToUIModel() =
-    Note(id, title, content, timeStamp.convertToDateTime(), colorId)
+    Note(id, title, content, isFavorite, timeStamp.convertToDateTime(), colorId)
 
 internal fun FolderModel.mapToUIModel() =
     Folder(id, name, noteCount)
 
 internal fun Note.mapToDomainModel() =
-    NoteModel(id, title, content, 0L, colorId)
+    NoteModel(id, title, content, isFavorite, 0L, colorId)
 
 internal fun Long.convertToDateTime(): String {
     val instant = Instant.fromEpochSeconds(this)

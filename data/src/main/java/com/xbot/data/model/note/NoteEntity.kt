@@ -1,4 +1,4 @@
-package com.xbot.data.model
+package com.xbot.data.model.note
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -9,6 +9,7 @@ data class NoteEntity(
     @PrimaryKey(autoGenerate = true) val noteId: Long,
     val title: String,
     val content: String,
+    val isFavorite: Boolean = false,
     val timeStamp: Long = Clock.System.now().toEpochMilliseconds(),
     val colorId: Int
 )

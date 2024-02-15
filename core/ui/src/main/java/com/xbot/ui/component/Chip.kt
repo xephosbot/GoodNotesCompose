@@ -52,8 +52,12 @@ fun SelectableChip(
     shape: Shape = SelectableChipDefaults.shape,
     colors: SelectableChipColors = SelectableChipDefaults.selectableChipColors(),
     border: SelectableChipBorder = SelectableChipDefaults.selectableChipBorder(),
-    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }
+    interactionSource: MutableInteractionSource? = null
 ) {
+    // TODO: Delete this after Compose 1.7.0
+    @Suppress("NAME_SHADOWING")
+    val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
+
     Surface(
         enabled = enabled,
         selected = selected,

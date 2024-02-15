@@ -11,7 +11,11 @@ import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -24,20 +28,25 @@ fun <T, K> LazyVerticalStaggeredGrid(
     columns: StaggeredGridCells,
     modifier: Modifier = Modifier,
     state: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
+    selectionState: SelectableItemsState<T> = rememberSelectableItemsState(),
     items: ImmutableList<T>,
     key: ((item: T) -> Any)? = null,
     refreshKey: K,
     contentPadding: PaddingValues = PaddingValues(0.dp),
-    verticalItemSpacing: Dp = 0.dp,
-    horizontalItemSpacing: Dp = 0.dp,
-    content: @Composable (T) -> Unit
+    verticalItemSpacing: Dp = 4.dp,
+    horizontalItemSpacing: Dp = 4.dp,
+    content: @Composable (item: T, selected: Boolean) -> Unit
 ) {
     val scope = rememberCoroutineScope()
+    var firstLaunchDone by remember { mutableStateOf(false) }
 
     LaunchedEffect(refreshKey) {
-        scope.launch {
-            state.scrollToItem(0)
+        if (firstLaunchDone) {
+            scope.launch {
+                state.scrollToItem(0)
+            }
         }
+        firstLaunchDone = true
     }
 
     LazyVerticalStaggeredGrid(
@@ -50,7 +59,9 @@ fun <T, K> LazyVerticalStaggeredGrid(
     ) {
         items(items, key) { item ->
             Box(modifier = Modifier.animateItemPlacement()) {
-                content(item)
+                with(selectionState) {
+                    content(item, item.selected)
+                }
             }
         }
     }

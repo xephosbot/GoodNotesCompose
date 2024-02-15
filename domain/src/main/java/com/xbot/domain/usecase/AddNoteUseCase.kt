@@ -8,6 +8,6 @@ class AddNoteUseCase @Inject constructor(
     private val repository: NoteRepository
 ) {
     suspend operator fun invoke(note: NoteModel, folderId: Long = 0L) {
-        repository.addNote(note, folderId)
+        repository.insertNote(note, folderId)
     }
 }

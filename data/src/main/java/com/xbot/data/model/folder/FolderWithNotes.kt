@@ -1,8 +1,10 @@
-package com.xbot.data.model
+package com.xbot.data.model.folder
 
 import androidx.room.Embedded
 import androidx.room.Junction
 import androidx.room.Relation
+import com.xbot.data.model.NoteFolderCrossRef
+import com.xbot.data.model.note.NoteEntity
 
 data class FolderWithNotes(
     @Embedded val folder: FolderEntity,

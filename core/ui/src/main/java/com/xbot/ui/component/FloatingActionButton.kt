@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
@@ -31,10 +32,14 @@ fun AnimatedFloatingActionButton(
     containerColor: Color = MaterialTheme.colorScheme.primaryContainer,
     contentColor: Color = contentColorFor(containerColor),
     elevation: FloatingActionButtonElevation = FloatingActionButtonDefaults.elevation(0.dp),
-    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    interactionSource: MutableInteractionSource? = null,
     visible: Boolean,
     content: @Composable () -> Unit
 ) {
+    // TODO: Delete this after Compose 1.7.0
+    @Suppress("NAME_SHADOWING")
+    val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
+
     AnimatedVisibility(
         visible = visible,
         enter = materialFadeIn(),
@@ -55,6 +60,24 @@ fun AnimatedFloatingActionButton(
 
 @Composable
 fun LazyListState.isScrollingUp(): State<Boolean> {
+    return produceState(initialValue = true) {
+        var lastIndex = 0
+        var lastScroll = Int.MAX_VALUE
+        snapshotFlow {
+            firstVisibleItemIndex to firstVisibleItemScrollOffset
+        }.collect { (currentIndex, currentScroll) ->
+            if (currentIndex != lastIndex || currentScroll != lastScroll) {
+                value = currentIndex < lastIndex ||
+                        (currentIndex == lastIndex && currentScroll < lastScroll)
+                lastIndex = currentIndex
+                lastScroll = currentScroll
+            }
+        }
+    }
+}
+
+@Composable
+fun LazyGridState.isScrollingUp(): State<Boolean> {
     return produceState(initialValue = true) {
         var lastIndex = 0
         var lastScroll = Int.MAX_VALUE

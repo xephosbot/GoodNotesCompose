@@ -1,15 +1,15 @@
 package com.xbot.ui.component
 
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.lerp
-import androidx.compose.ui.text.style.lerp
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextGeometricTransform
+import androidx.compose.ui.text.style.lerp
 
 internal fun lerp(start: Float, stop: Float, fraction: Float): Float {
     return start + fraction * (stop - start)

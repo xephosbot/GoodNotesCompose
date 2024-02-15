@@ -1,6 +1,5 @@
 package com.xbot.domain.repository
 
-import com.xbot.domain.model.FolderModel
 import com.xbot.domain.model.NoteModel
 import kotlinx.coroutines.flow.Flow
 
@@ -10,15 +9,11 @@ interface NoteRepository {
 
     suspend fun getNote(noteId: Long): NoteModel?
 
-    suspend fun addNote(note: NoteModel, folderId: Long = 0L)
+    suspend fun insertNote(note: NoteModel, folderId: Long = 0L)
 
     suspend fun deleteNote(note: NoteModel, folderId: Long = 0L)
 
-    val folders: Flow<List<FolderModel>>
+    suspend fun updateNote(noteId: Long, isFavorite: Boolean)
 
     suspend fun openFolder(folderId: Long)
-
-    suspend fun addFolder(folder: FolderModel)
-
-    suspend fun deleteFolder(folder: FolderModel)
 }

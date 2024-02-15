@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -30,9 +31,13 @@ fun ShapedIconButton(
     enabled: Boolean = true,
     colors: ShapedIconButtonColors = ShapedIconButtonDefaults.shapedIconButtonColors(),
     shape: Shape = ShapedIconButtonDefaults.shape,
-    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    interactionSource: MutableInteractionSource? = null,
     content: @Composable () -> Unit
 ) {
+    // TODO: Delete this after Compose 1.7.0
+    @Suppress("NAME_SHADOWING")
+    val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
+
     Box(
         modifier = modifier
             .minimumInteractiveComponentSize()
@@ -55,17 +60,56 @@ fun ShapedIconButton(
     }
 }
 
+@Composable
+fun ShapedIconToggleButton(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    colors: ShapedIconToggleButtonColors = ShapedIconButtonDefaults.shapedIconToggleButtonColors(),
+    shape: Shape = ShapedIconButtonDefaults.shape,
+    interactionSource: MutableInteractionSource? = null,
+    content: @Composable () -> Unit
+) {
+    // TODO: Delete this after Compose 1.7.0
+    @Suppress("NAME_SHADOWING")
+    val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
+
+    Box(
+        modifier = modifier
+            .minimumInteractiveComponentSize()
+            .size(ShapedIconButtonDefaults.Size)
+            .clip(shape)
+            .background(color = colors.containerColor(enabled, checked).value)
+            .toggleable(
+                value = checked,
+                onValueChange = onCheckedChange,
+                enabled = enabled,
+                role = Role.Checkbox,
+                interactionSource = interactionSource,
+                indication = rememberRipple(
+                    bounded = true,
+                )
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        val contentColor = colors.contentColor(enabled, checked).value
+        CompositionLocalProvider(LocalContentColor provides contentColor, content = content)
+    }
+}
+
 object ShapedIconButtonDefaults {
 
     val Size = 72.dp
 
     val shape: Shape @Composable get() = MaterialTheme.shapes.extraSmall
 
+    private const val ContainerDefaultOpacity = 0.12f
     private const val DisabledIconOpacity = 0.38f
 
     @Composable
     fun shapedIconButtonColors(
-        containerColor: Color = Color.Transparent,
+        containerColor: Color = LocalContentColor.current.copy(alpha = ContainerDefaultOpacity),
         contentColor: Color = LocalContentColor.current,
         disabledContainerColor: Color = Color.Transparent,
         disabledContentColor: Color = containerColor.copy(alpha = DisabledIconOpacity)
@@ -75,6 +119,24 @@ object ShapedIconButtonDefaults {
         disabledContainerColor = disabledContainerColor,
         disabledContentColor = disabledContentColor
     )
+
+    @Composable
+    fun shapedIconToggleButtonColors(
+        containerColor: Color = LocalContentColor.current.copy(alpha = ContainerDefaultOpacity),
+        contentColor: Color = LocalContentColor.current,
+        disabledContainerColor: Color = Color.Transparent,
+        disabledContentColor: Color = contentColor.copy(alpha = DisabledIconOpacity),
+        checkedContainerColor: Color = MaterialTheme.colorScheme.primary,
+        checkedContentColor: Color = MaterialTheme.colorScheme.onPrimary
+    ): ShapedIconToggleButtonColors =
+        ShapedIconToggleButtonColors(
+            containerColor = containerColor,
+            contentColor = contentColor,
+            disabledContainerColor = disabledContainerColor,
+            disabledContentColor = disabledContentColor,
+            checkedContainerColor = checkedContainerColor,
+            checkedContentColor = checkedContentColor,
+        )
 }
 
 @Immutable
@@ -93,5 +155,35 @@ class ShapedIconButtonColors(
     @Composable
     internal fun contentColor(enabled: Boolean): State<Color> {
         return rememberUpdatedState(if (enabled) contentColor else disabledContentColor)
+    }
+}
+
+@Immutable
+class ShapedIconToggleButtonColors internal constructor(
+    private val containerColor: Color,
+    private val contentColor: Color,
+    private val disabledContainerColor: Color,
+    private val disabledContentColor: Color,
+    private val checkedContainerColor: Color,
+    private val checkedContentColor: Color,
+) {
+    @Composable
+    internal fun containerColor(enabled: Boolean, checked: Boolean): State<Color> {
+        val target = when {
+            !enabled -> disabledContainerColor
+            !checked -> containerColor
+            else -> checkedContainerColor
+        }
+        return rememberUpdatedState(target)
+    }
+
+    @Composable
+    internal fun contentColor(enabled: Boolean, checked: Boolean): State<Color> {
+        val target = when {
+            !enabled -> disabledContentColor
+            !checked -> contentColor
+            else -> checkedContentColor
+        }
+        return rememberUpdatedState(target)
     }
 }

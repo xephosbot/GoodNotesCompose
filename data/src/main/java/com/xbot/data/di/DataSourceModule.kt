@@ -2,9 +2,10 @@ package com.xbot.data.di
 
 import android.content.Context
 import androidx.room.Room
-import com.xbot.data.BuildConfig
 import com.xbot.data.source.AppDatabase
+import com.xbot.data.source.FolderDao
 import com.xbot.data.source.NoteDao
+import com.xbot.data.source.NoteFolderCrossRefDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -15,11 +16,22 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object DataSourceModule {
+    @Provides
+    @Singleton
+    fun provideNoteDao(appDatabase: AppDatabase): NoteDao {
+        return appDatabase.noteDao
+    }
 
     @Provides
     @Singleton
-    fun provideNoteDao2(appDatabase: AppDatabase): NoteDao {
-        return appDatabase.noteDao
+    fun provideFolderDao(appDatabase: AppDatabase): FolderDao {
+        return appDatabase.folderDao
+    }
+
+    @Provides
+    @Singleton
+    fun provideNoteFolderCrossRefDao(appDatabase: AppDatabase): NoteFolderCrossRefDao {
+        return appDatabase.noteFolderCrossRefDao
     }
 
     @Provides

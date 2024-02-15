@@ -41,8 +41,8 @@ fun NoteCard(
     trailingContent: @Composable (() -> Unit)? = null,
     supportingContent: @Composable (() -> Unit)? = null,
     bodyContent: @Composable () -> Unit,
-    onClick: () -> Unit = {},
-    onLongClick: () -> Unit = {}
+    onClick: (Boolean) -> Unit = {},
+    onLongClick: (Boolean) -> Unit = {}
 ) {
     NoteCardContent(
         modifier = modifier,
@@ -67,8 +67,8 @@ private fun NoteCardContent(
     colors: NoteCardColors,
     border: NoteCardBorder,
     shape: Shape,
-    onClick: () -> Unit,
-    onLongClick: () -> Unit,
+    onClick: (Boolean) -> Unit,
+    onLongClick: (Boolean) -> Unit,
     headlineContent: @Composable () -> Unit,
     trailingContent: @Composable (() -> Unit)?,
     supportingContent: @Composable (() -> Unit)?,
@@ -78,8 +78,8 @@ private fun NoteCardContent(
         modifier = modifier
             .clip(shape)
             .combinedClickable(
-                onClick = onClick,
-                onLongClick = onLongClick
+                onClick = { onClick(selected) },
+                onLongClick = { onLongClick(selected) }
             ),
         color = colors.containerColor(selected).value,
         contentColor = colors.contentColor().value,
@@ -156,10 +156,6 @@ fun NoteCardLayout(
         }
     }
 }
-
-
-
-
 
 object NoteCardDefaults {
 

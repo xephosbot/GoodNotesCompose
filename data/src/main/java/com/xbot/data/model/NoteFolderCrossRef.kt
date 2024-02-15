@@ -4,6 +4,8 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.ForeignKey.Companion.CASCADE
+import com.xbot.data.model.folder.FolderEntity
+import com.xbot.data.model.note.NoteEntity
 
 @Entity(
     tableName = "note_folder",
