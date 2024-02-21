@@ -324,6 +324,8 @@ private fun NoteCard(
         bodyContent = {
             Text(
                 text = note.content,
+                maxLines = 5,
+                overflow = TextOverflow.Ellipsis,
                 style = MaterialTheme.typography.bodySmall
             )
         },

@@ -1,5 +1,7 @@
 package com.xbot.goodnotes.navigation
 
+import androidx.compose.foundation.background
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavType
@@ -17,7 +19,7 @@ fun GoodNotesNavHost(
     startDestination: String = "notesScreen"
 ) {
     NavHost(
-        modifier = modifier,
+        modifier = modifier.background(MaterialTheme.colorScheme.surface),
         navController = appState.navController,
         startDestination = startDestination
     ) {

@@ -26,4 +26,3 @@ fun Color.harmonize(with: Color) = Color(MaterialColors.harmonize(this.toArgb(),
 val Color.harmonized
     @Composable
     get() = harmonize(MaterialTheme.colorScheme.primary)
-
