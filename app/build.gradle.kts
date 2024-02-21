@@ -52,7 +52,6 @@ android {
 dependencies {
     // Project-level dependencies
     implementation(project(":core:ui"))
-    implementation(project(":core:shared-element"))
     implementation(project(":domain"))
     implementation(project(":data"))
 

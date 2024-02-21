@@ -9,8 +9,8 @@ val Typography = Typography(
     displayLarge = TextStyle(
         fontFamily = MontserratFontFamily,
         fontWeight = FontWeight.SemiBold,
-        fontSize = 72.sp,
-        lineHeight = 76.sp,
+        fontSize = 64.sp,
+        lineHeight = 70.sp,
         letterSpacing = (-1.5).sp
     ),
     displayMedium = TextStyle(
@@ -50,17 +50,17 @@ val Typography = Typography(
     ),
     titleLarge = TextStyle(
         fontFamily = MontserratFontFamily,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 22.sp,
-        lineHeight = 28.sp,
-        letterSpacing = (-0.5).sp
-    ),
-    titleMedium = TextStyle(
-        fontFamily = MontserratFontFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 20.sp,
         lineHeight = 26.sp,
         letterSpacing = 0.15.sp
+    ),
+    titleMedium = TextStyle(
+        fontFamily = MontserratFontFamily,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 18.sp,
+        lineHeight = 24.sp,
+        letterSpacing = (-0.5).sp
     ),
     titleSmall = TextStyle(
         fontFamily = MontserratFontFamily,

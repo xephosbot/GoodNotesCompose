@@ -130,29 +130,16 @@ fun NoteCardLayout(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Box(modifier = Modifier.weight(1.0f)) {
-                    ProvideTextStyle(
-                        value = MaterialTheme.typography.titleLarge.copy(
-                            lineBreak = LineBreak.Heading,
-                            hyphens = Hyphens.Auto
-                        )
-                    ) {
-                        headlineContent()
-                    }
+                    headlineContent()
                 }
                 Box(modifier = Modifier.align(Alignment.Top)) {
                     trailingContent()
                 }
             }
-            Box {
-                ProvideTextStyle(value = MaterialTheme.typography.titleSmall) {
-                    supportingContent()
-                }
-            }
+            supportingContent()
         }
         Box(modifier = Modifier.padding(horizontal = NoteCardDefaults.NoteCardHorizontalPadding)) {
-            ProvideTextStyle(value = MaterialTheme.typography.bodySmall) {
-                bodyContent()
-            }
+            bodyContent()
         }
     }
 }
@@ -161,7 +148,7 @@ object NoteCardDefaults {
 
     val NoteCardHorizontalPadding = 16.dp
     val NoteCardVerticalPadding = 32.dp
-    val NoteCardEndPadding = 8.dp
+    val NoteCardEndPadding = 12.dp
 
     val SelectedElevation = 8.dp
 

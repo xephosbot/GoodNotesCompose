@@ -46,7 +46,7 @@ fun SelectableChip(
     selected: Boolean = false,
     onClick: () -> Unit = {},
     label: @Composable () -> Unit,
-    labelTextStyle: TextStyle = MaterialTheme.typography.titleMedium,
+    labelTextStyle: TextStyle = MaterialTheme.typography.titleLarge,
     enabled: Boolean = true,
     leadingIcon: @Composable (() -> Unit)? = null,
     shape: Shape = SelectableChipDefaults.shape,

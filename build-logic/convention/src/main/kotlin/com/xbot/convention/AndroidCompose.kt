@@ -46,6 +46,7 @@ internal fun Project.configureAndroidCompose(
 }
 
 private fun Project.buildComposeMetricsParameters(): List<String> {
+    //Command to run: ./gradlew assembleRelease -PenableComposeCompilerReports=true -PenableComposeCompilerMetrics=true
     val metricParameters = mutableListOf<String>()
     val enableMetricsProvider = project.providers.gradleProperty("enableComposeCompilerMetrics")
     val relativePath = projectDir.relativeTo(rootDir)

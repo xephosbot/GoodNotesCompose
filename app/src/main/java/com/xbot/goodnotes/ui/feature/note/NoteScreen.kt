@@ -1,7 +1,6 @@
 package com.xbot.goodnotes.ui.feature.note
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
@@ -14,18 +13,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
@@ -55,6 +46,7 @@ import com.xbot.ui.component.SelectableChip
 import com.xbot.ui.component.SelectableChipBadge
 import com.xbot.ui.component.ShapedIconToggleButton
 import com.xbot.ui.component.isScrollingUp
+import com.xbot.ui.icon.Icons
 import com.xbot.ui.theme.NoteColors
 import com.xbot.ui.theme.harmonized
 import kotlinx.collections.immutable.ImmutableList
@@ -116,7 +108,7 @@ private fun NoteScreenContent(
                         onEvent(NoteScreenEvent.OpenFolder(folder.id))
                     }
                 )
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(8.dp))
             }
         },
         floatingActionButton = {
@@ -125,35 +117,25 @@ private fun NoteScreenContent(
                 visible = lazyGridState.isScrollingUp().value && !selectionState.inSelectionMode
             ) {
                 Icon(
-                    imageVector = Icons.Default.Add,
+                    imageVector = Icons.Add,
                     contentDescription = ""
                 )
             }
         }
     ) { innerPadding ->
-        //TODO: Layout switching parameter
-        Crossfade(targetState = true) { isGridLayout ->
-            when(isGridLayout) {
-                true -> {
-                    NoteLazyGrid(
-                        state = lazyGridState,
-                        selectionState = selectionState,
-                        items = state.notesList,
-                        refreshKey = state.currentFolderId,
-                        contentPadding = innerPadding + PaddingValues(horizontal = 4.dp),
-                        onCLickNoteCard = { note ->
-                            navigate(note.id)
-                        },
-                        onFavoriteClick = { note ->
-                            onEvent(NoteScreenEvent.UpdateNote(note, !note.isFavorite))
-                        }
-                    )
-                }
-                else -> {
-                    NoteLazyColumn()
-                }
+        NoteLazyGrid(
+            state = lazyGridState,
+            selectionState = selectionState,
+            items = state.notesList,
+            refreshKey = state.currentFolderId,
+            contentPadding = innerPadding + PaddingValues(horizontal = 4.dp),
+            onCLickNoteCard = { note ->
+                navigate(note.id)
+            },
+            onFavoriteClick = { note ->
+                onEvent(NoteScreenEvent.UpdateNote(note, !note.isFavorite))
             }
-        }
+        )
     }
 }
 
@@ -173,8 +155,8 @@ fun NoteScreenTopAppBar(
         modifier = modifier,
         selected = selectionState.inSelectionMode,
         title = { selected ->
-            when(selected) {
-                true -> "Notes:\n${selectionState.selectedCount}"
+            when (selected) {
+                true -> stringResource(R.string.notes_count_title, selectionState.selectedCount)
                 else -> stringResource(R.string.my_notes_title)
             }
         },
@@ -182,24 +164,24 @@ fun NoteScreenTopAppBar(
             if (selected) {
                 IconButton(onClick = onClearClick) {
                     Icon(
-                        imageVector = Icons.Filled.Clear,
+                        imageVector = Icons.Clear,
                         contentDescription = ""
                     )
                 }
             }
         },
         actions = { selected ->
-            when(selected) {
+            when (selected) {
                 true -> {
                     IconButton(onClick = onDeleteClick) {
                         Icon(
-                            imageVector = Icons.Filled.Delete,
+                            imageVector = Icons.Delete,
                             contentDescription = ""
                         )
                     }
                     IconButton(onClick = onMoreClick) {
                         Icon(
-                            imageVector = Icons.Filled.MoreVert,
+                            imageVector = Icons.MoreVert,
                             contentDescription = ""
                         )
                     }
@@ -207,7 +189,7 @@ fun NoteScreenTopAppBar(
                 else -> {
                     IconButton(onClick = onSettingsClick) {
                         Icon(
-                            imageVector = Icons.Filled.Settings,
+                            imageVector = Icons.Settings,
                             contentDescription = ""
                         )
                     }
@@ -222,7 +204,7 @@ fun NoteScreenTopAppBar(
 @Composable
 private fun FolderLazyRow(
     modifier: Modifier = Modifier,
-    items: ImmutableList<Folder>,
+    items: List<Folder>,
     isFolderSelected: (Folder) -> Boolean,
     onFolderClick: (Folder) -> Unit
 ) {
@@ -271,7 +253,7 @@ private fun NoteLazyGrid(
             note = note,
             selected = selected,
             onClick = {
-                when(selectionState.inSelectionMode) {
+                when (selectionState.inSelectionMode) {
                     true -> selectionState.updateItem(note)
                     else -> onCLickNoteCard(note)
                 }
@@ -280,20 +262,13 @@ private fun NoteLazyGrid(
                 selectionState.updateItem(note)
             },
             onFavoriteClick = {
-                when(selectionState.inSelectionMode) {
+                when (selectionState.inSelectionMode) {
                     true -> selectionState.updateItem(note)
                     else -> onFavoriteClick(note)
                 }
             }
         )
     }
-}
-
-@Composable
-private fun NoteLazyColumn(
-    modifier: Modifier = Modifier
-) {
-    //TODO: Lazy column layout variant
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -317,7 +292,8 @@ private fun NoteCard(
             Text(
                 text = note.title,
                 maxLines = 2,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.titleMedium
             )
         },
         trailingContent = {
@@ -328,19 +304,29 @@ private fun NoteCard(
                 Icon(
                     imageVector = if (!selected) {
                         if (!note.isFavorite) {
-                            Icons.Outlined.FavoriteBorder
+                            Icons.FavoriteBorder
                         } else {
-                            Icons.Filled.Favorite
+                            Icons.Favorite
                         }
                     } else {
-                        Icons.Filled.Done
+                        Icons.Done
                     },
                     contentDescription = ""
                 )
             }
         },
-        supportingContent = { Text(text = note.dateTime) },
-        bodyContent = { Text(text = note.content) },
+        supportingContent = {
+            Text(
+                text = note.dateTime,
+                style = MaterialTheme.typography.titleSmall
+            )
+        },
+        bodyContent = {
+            Text(
+                text = note.content,
+                style = MaterialTheme.typography.bodySmall
+            )
+        },
         onClick = { onClick() },
         onLongClick = { onLongClick() }
     )

@@ -9,6 +9,8 @@ import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.layout.SubcomposeMeasureScope
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.util.fastMap
+import androidx.compose.ui.util.fastMapIndexed
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -38,8 +40,8 @@ internal fun DimensionSubcomposeLayout(
     ) { constraints: Constraints ->
 
         // Subcompose(compose only a section) main content and get Placeable
-        val mainPlaceables = contents.mapIndexed { index, content ->
-            subcompose(Slots.Main(index), content).map {
+        val mainPlaceables = contents.fastMapIndexed { index, content ->
+            subcompose(Slots.Main(index), content).fastMap {
                 it.measure(constraints.copy(minWidth = 0, minHeight = 0))
             }.first()
         }
@@ -47,12 +49,12 @@ internal fun DimensionSubcomposeLayout(
         val dependentContentsSize = if (contents.isEmpty()) {
             persistentListOf()
         } else {
-            mainPlaceables.map { Size(it.width.toFloat(), it.height.toFloat()) }.toImmutableList()
+            mainPlaceables.fastMap { Size(it.width.toFloat(), it.height.toFloat()) }.toImmutableList()
         }
 
         val dependentPlaceable: Placeable = subcompose(Slots.Dependent) {
             dependentContent(dependentContentsSize)
-        }.map { measurable: Measurable ->
+        }.fastMap { measurable: Measurable ->
             measurable.measure(constraints)
         }.first()
 
@@ -87,7 +89,7 @@ internal fun DimensionSubcomposeLayout(
     ) { constraints: Constraints ->
 
         // Subcompose(compose only a section) main content and get Placeable
-        val mainPlaceable = subcompose(Slots.Main(0), content).map {
+        val mainPlaceable = subcompose(Slots.Main(0), content).fastMap {
             it.measure(constraints.copy(minWidth = 0, minHeight = 0))
         }.maxByOrNull { it.height }
 
@@ -99,7 +101,7 @@ internal fun DimensionSubcomposeLayout(
 
         val dependentPlaceable: Placeable = subcompose(Slots.Dependent) {
             dependentContent(dependentContentSize)
-        }.map { measurable: Measurable ->
+        }.fastMap { measurable: Measurable ->
             measurable.measure(constraints)
         }.first()
 

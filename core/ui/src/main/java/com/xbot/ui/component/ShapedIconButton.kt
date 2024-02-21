@@ -100,7 +100,7 @@ fun ShapedIconToggleButton(
 
 object ShapedIconButtonDefaults {
 
-    val Size = 72.dp
+    val Size = 48.dp
 
     val shape: Shape @Composable get() = MaterialTheme.shapes.extraSmall
 

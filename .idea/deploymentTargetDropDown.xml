@@ -11,14 +11,27 @@
       <entry key="LazyColumnDragAndDropDemo">
         <State />
       </entry>
-      <entry key="NoteCardListPreview">
-        <State />
-      </entry>
       <entry key="TestPreview">
         <State />
       </entry>
-      <entry key="app">
+      <entry key="UserCardsRoot">
         <State />
+      </entry>
+      <entry key="app">
+        <State>
+          <runningDeviceTargetSelectedWithDropDown>
+            <Target>
+              <type value="RUNNING_DEVICE_TARGET" />
+              <deviceKey>
+                <Key>
+                  <type value="SERIAL_NUMBER" />
+                  <value value="RZCW40ERVXY" />
+                </Key>
+              </deviceKey>
+            </Target>
+          </runningDeviceTargetSelectedWithDropDown>
+          <timeTargetWasSelectedWithDropDown value="2024-02-21T19:40:34.395613800Z" />
+        </State>
       </entry>
     </value>
   </component>
