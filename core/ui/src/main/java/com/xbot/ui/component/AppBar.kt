@@ -1,5 +1,6 @@
 package com.xbot.ui.component
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.AnimationState
 import androidx.compose.animation.core.DecayAnimationSpec
@@ -214,6 +215,7 @@ private fun LargeTopAppBarContent(
     }
 }
 
+@SuppressLint("RestrictedApi")
 @Composable
 private fun LargeTopAppBarLayout(
     modifier: Modifier,
@@ -236,11 +238,15 @@ private fun LargeTopAppBarLayout(
     textStyleEasing: Easing = FastOutSlowInEasing,
     titleBottomPadding: Int
 ) {
+    val converter = rememberFontScaleConverter()
 
-    val expandedLineHeight = titleTextStyle.lineHeight.value
-    val expandedFontSize = titleTextStyle.fontSize.value
-    val collapsedLineHeight =
-        collapsedTitleTextStyle.fontSize.value * (expandedLineHeight / expandedFontSize)
+    val expandedFontSize = converter?.convertSpToDp(titleTextStyle.fontSize.value)
+        ?: titleTextStyle.fontSize.value
+    val collapsedFontSize = converter?.convertSpToDp(collapsedTitleTextStyle.fontSize.value)
+        ?: collapsedTitleTextStyle.fontSize.value
+    val expandedLineHeight = converter?.convertSpToDp(titleTextStyle.lineHeight.value)
+        ?: titleTextStyle.lineHeight.value
+    val collapsedLineHeight = collapsedFontSize * (expandedLineHeight / expandedFontSize)
 
     val expandedScaleRatio = lerp(
         start = 1f,
