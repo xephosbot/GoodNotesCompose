@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
+import java.util.LinkedList
 import javax.inject.Inject
 
 class NoteRepositoryImpl @Inject constructor(
@@ -25,11 +26,16 @@ class NoteRepositoryImpl @Inject constructor(
 
     private val currentFolderId = MutableStateFlow(DEFAULT_FOLDER_ID)
 
+    private val deletedNotes = LinkedList<List<NoteEntity>>()
+    private val deletedCrossRefs = LinkedList<List<NoteFolderCrossRef>>()
+
     override val notes: Flow<List<NoteModel>> = currentFolderId.flatMapLatest { folderId ->
-        if (folderId == DEFAULT_FOLDER_ID) {
-            noteDao.getNotes().map { it.map(NoteEntity::mapToDomainModel) }
-        } else {
-            folderDao.getFolderWithNotes(folderId).map { it.notes.map(NoteEntity::mapToDomainModel) }
+        val notesFlow = when (folderId) {
+            DEFAULT_FOLDER_ID -> noteDao.getNotes().map { it.map(NoteEntity::mapToDomainModel) }
+            else -> folderDao.getFolderWithNotes(folderId).map { it.notes.map(NoteEntity::mapToDomainModel) }
+        }
+        notesFlow.map { noteList ->
+            noteList.sortedByDescending { it.timeStamp }
         }
     }
 
@@ -45,13 +51,28 @@ class NoteRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun deleteNote(note: NoteModel, folderId: Long) {
+    override suspend fun deleteNotes(notes: List<NoteModel>, folderId: Long) {
         if (folderId == DEFAULT_FOLDER_ID) {
-            noteDao.delete(note.mapToDataModel())
+            val dataNotes = notes.map(NoteModel::mapToDataModel)
+            val crossRefs = notes.flatMap { note ->
+                noteFolderCrossRefDao.getCrossRefsForNote(note.id)
+            }
+            deletedNotes.add(dataNotes)
+            deletedCrossRefs.add(crossRefs)
+            noteDao.deleteAll(dataNotes)
         } else {
-            val crossRef = NoteFolderCrossRef(note.id, folderId)
-            noteFolderCrossRefDao.delete(crossRef)
+            val crossRefs = notes.map { note ->
+                NoteFolderCrossRef(note.id, folderId)
+            }
+            deletedNotes.add(listOf())
+            deletedCrossRefs.add(crossRefs)
+            noteFolderCrossRefDao.deleteAll(crossRefs)
         }
+    }
+
+    override suspend fun restoreNotes() {
+        deletedNotes.poll()?.let { noteDao.insertAll(it) }
+        deletedCrossRefs.poll()?.let { noteFolderCrossRefDao.insertAll(it) }
     }
 
     override suspend fun updateNote(noteId: Long, isFavorite: Boolean) {

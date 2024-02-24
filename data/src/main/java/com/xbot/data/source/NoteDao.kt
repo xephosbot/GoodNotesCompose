@@ -17,14 +17,20 @@ interface NoteDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(note: NoteEntity): Long
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(notes: List<NoteEntity>)
+
     @Query("SELECT * FROM notes WHERE noteId = :noteId")
     suspend fun getNote(noteId: Long): NoteEntity?
 
     @Query("SELECT COUNT(*) FROM notes")
-    suspend fun getNoteCount(): Int
+    fun getNoteCount(): Flow<Int>
 
     @Delete
     suspend fun delete(note: NoteEntity)
+
+    @Delete
+    suspend fun deleteAll(notes: List<NoteEntity>)
 
     @Query("SELECT * FROM notes")
     fun getNotes(): Flow<List<NoteEntity>>

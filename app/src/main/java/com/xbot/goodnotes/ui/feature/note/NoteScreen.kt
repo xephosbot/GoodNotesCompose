@@ -17,14 +17,21 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -39,6 +46,7 @@ import com.xbot.goodnotes.ui.component.Scaffold
 import com.xbot.goodnotes.ui.component.SelectableItemsState
 import com.xbot.goodnotes.ui.component.rememberSelectableItemsState
 import com.xbot.goodnotes.ui.plus
+import com.xbot.goodnotes.ui.rememberSnackbarVisuals
 import com.xbot.ui.component.AnimatedFloatingActionButton
 import com.xbot.ui.component.NoteCard
 import com.xbot.ui.component.NoteCardDefaults
@@ -50,18 +58,19 @@ import com.xbot.ui.icon.Icons
 import com.xbot.ui.theme.NoteColors
 import com.xbot.ui.theme.harmonized
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.coroutines.launch
 
 @Composable
 fun NoteScreen(
     viewModel: NoteViewModel = hiltViewModel(),
-    navigate: (Long) -> Unit
+    onNavigate: (Long) -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     NoteScreenContent(
         state = state,
-        onEvent = viewModel::onEvent,
-        navigate = navigate
+        onAction = viewModel::onAction,
+        onNavigate = onNavigate
     )
 }
 
@@ -70,12 +79,31 @@ fun NoteScreen(
 private fun NoteScreenContent(
     modifier: Modifier = Modifier,
     state: NoteScreenState,
-    onEvent: (NoteScreenEvent) -> Unit,
-    navigate: (Long) -> Unit
+    onAction: (NoteScreenAction) -> Unit,
+    onNavigate: (Long) -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val selectionState = rememberSelectableItemsState<Note>()
     val lazyGridState = rememberLazyStaggeredGridState()
+
+    val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val snackbarVisuals = rememberSnackbarVisuals(
+        message = pluralStringResource(R.plurals.notes_delete_snackbar, selectionState.selectedCount, selectionState.selectedCount),
+        actionLabel = stringResource(R.string.notes_cancel_snackbar)
+    )
+
+    val onShowSnackBar: () -> Unit = {
+        coroutineScope.launch {
+            val result = snackbarHostState.showSnackbar(snackbarVisuals)
+            when (result) {
+                SnackbarResult.ActionPerformed -> {
+                    onAction(NoteScreenAction.UndoDelete)
+                }
+                SnackbarResult.Dismissed -> {}
+            }
+        }
+    }
 
     BackHandler(enabled = selectionState.inSelectionMode) {
         selectionState.clear()
@@ -90,7 +118,8 @@ private fun NoteScreenContent(
                     //TODO: navigate to settings screen
                 },
                 onDeleteClick = {
-                    onEvent(NoteScreenEvent.DeleteNotes(selectionState.selectedItems))
+                    onAction(NoteScreenAction.DeleteNotes(selectionState.selectedItems))
+                    onShowSnackBar()
                     selectionState.clear()
                 },
                 onMoreClick = {
@@ -105,10 +134,18 @@ private fun NoteScreenContent(
                     items = state.foldersList,
                     isFolderSelected = { it.id == state.currentFolderId },
                     onFolderClick = { folder ->
-                        onEvent(NoteScreenEvent.OpenFolder(folder.id))
+                        onAction(NoteScreenAction.OpenFolder(folder.id))
                     }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
+            }
+        },
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState) { data ->
+                Snackbar(
+                    snackbarData = data,
+                    shape = MaterialTheme.shapes.medium
+                )
             }
         },
         floatingActionButton = {
@@ -130,10 +167,10 @@ private fun NoteScreenContent(
             refreshKey = state.currentFolderId,
             contentPadding = innerPadding + PaddingValues(horizontal = 4.dp),
             onCLickNoteCard = { note ->
-                navigate(note.id)
+                onNavigate(note.id)
             },
             onFavoriteClick = { note ->
-                onEvent(NoteScreenEvent.UpdateNote(note, !note.isFavorite))
+                onAction(NoteScreenAction.UpdateNote(note, !note.isFavorite))
             }
         )
     }
