@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -16,10 +17,11 @@ import com.xbot.goodnotes.ui.feature.note.NoteScreen
 fun GoodNotesNavHost(
     modifier: Modifier = Modifier,
     appState: GoodNotesAppState,
+    containerColor: Color = MaterialTheme.colorScheme.surface,
     startDestination: String = "notesScreen"
 ) {
     NavHost(
-        modifier = modifier.background(MaterialTheme.colorScheme.surface),
+        modifier = modifier.background(containerColor),
         navController = appState.navController,
         startDestination = startDestination
     ) {
@@ -33,9 +35,9 @@ fun GoodNotesNavHost(
             }
         }
         composable(
-            route = "noteDetailScreen/{noteId}",
+            route = "noteDetailScreen/{$NOTE_ID_ARG}",
             arguments = listOf(
-                navArgument(name = "noteId") { type = NavType.LongType }
+                navArgument(name = NOTE_ID_ARG) { type = NavType.LongType }
             )
         ) {
             NoteDetailScreen {
@@ -44,3 +46,5 @@ fun GoodNotesNavHost(
         }
     }
 }
+
+private const val NOTE_ID_ARG = "noteId"

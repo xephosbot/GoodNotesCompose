@@ -10,6 +10,4 @@ interface FolderRepository {
     suspend fun insertFolder(folder: FolderModel)
 
     suspend fun deleteFolder(folder: FolderModel)
-
-    suspend fun updateFolder(positionFrom: Int, positionTo: Int)
 }

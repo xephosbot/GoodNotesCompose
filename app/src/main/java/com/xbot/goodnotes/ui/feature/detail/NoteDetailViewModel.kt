@@ -31,8 +31,8 @@ class NoteDetailViewModel @Inject constructor(
         }
     }
 
-    override fun onEvent(event: NoteDetailScreenEvent) {
-        when (event) {
+    override fun onAction(action: NoteDetailScreenEvent) {
+        when (action) {
             is NoteDetailScreenEvent.Save -> {
 
             }

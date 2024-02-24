@@ -29,7 +29,7 @@ fun NoteDetailScreen(
 
     NoteDetailScreenContent(
         state = state,
-        onEvent = viewModel::onEvent,
+        onEvent = viewModel::onAction,
         navigate = navigate
     )
 }
