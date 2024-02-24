@@ -2,4 +2,9 @@
     <string name="app_name" translatable="false">GoodNotes</string>
     <string name="my_notes_title">My\nNotes</string>
     <string name="notes_count_title">Notes:\n%1$d</string>
+    <string name="notes_cancel_snackbar">Cancel</string>
+    <plurals name="notes_delete_snackbar">
+        <item quantity="one">%d note was deleted</item>
+        <item quantity="other">%d notes were deleted</item>
+    </plurals>
 </resources>
