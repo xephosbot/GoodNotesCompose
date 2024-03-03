@@ -1,9 +1,9 @@
-package com.xbot.domain.usecase
+package com.xbot.domain.usecase.note
 
 import com.xbot.domain.repository.NoteRepository
 import javax.inject.Inject
 
-class UpdateNoteUseCase @Inject constructor(
+class UpdateNote @Inject constructor(
     private val repository: NoteRepository
 ) {
     suspend operator fun invoke(noteId: Long, isFavorite: Boolean) {

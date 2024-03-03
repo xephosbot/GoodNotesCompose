@@ -1,20 +1,28 @@
-package com.xbot.goodnotes.ui.component
+package com.xbot.ui.component
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.rememberSaveable
 
 @Composable
 fun <T> rememberSelectableItemsState(): SelectableItemsState<T> {
-    return remember {
+    return rememberSaveable(saver = SelectableItemsState.Saver()) {
         SelectableItemsState()
     }
 }
 
-class SelectableItemsState<T> {
+class SelectableItemsState<T> private constructor(initialItems: List<T>) {
+
+    constructor() : this(emptyList())
 
     private val _selectedItems = mutableStateListOf<T>()
+
+    init {
+        _selectedItems.addAll(initialItems)
+    }
 
     val inSelectionMode: Boolean
         get() = derivedStateOf { _selectedItems.isNotEmpty() }.value
@@ -37,5 +45,13 @@ class SelectableItemsState<T> {
 
     fun clear() {
         _selectedItems.clear()
+    }
+
+    companion object {
+        fun <T> Saver(): Saver<SelectableItemsState<T>, Any> =
+            listSaver(
+                save = { state -> state.selectedItems.toList() },
+                restore = { selectedItems -> SelectableItemsState(selectedItems) }
+            )
     }
 }

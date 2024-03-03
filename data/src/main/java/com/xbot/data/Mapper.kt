@@ -15,4 +15,4 @@ internal fun NoteModel.mapToDataModel() =
     NoteEntity(id, title, content, isFavorite, timeStamp, colorId)
 
 internal fun FolderModel.mapToDataModel() =
-    FolderEntity(id, name, 0)
+    FolderEntity(id, name)

@@ -6,3 +6,7 @@ data class NoteDetailScreenState(
     val noteText: String = "",
     val noteColorId: Int = 0
 )
+
+sealed interface NoteDetailScreenAction {
+    data object Save : NoteDetailScreenAction
+}

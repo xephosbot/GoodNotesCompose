@@ -17,48 +17,40 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Snackbar
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.xbot.goodnotes.R
+import com.xbot.goodnotes.convertToDateTime
 import com.xbot.goodnotes.model.Folder
 import com.xbot.goodnotes.model.Note
-import com.xbot.goodnotes.ui.component.LargeTopAppBarWithSelectionMode
-import com.xbot.goodnotes.ui.component.LazyVerticalStaggeredGrid
-import com.xbot.goodnotes.ui.component.Scaffold
-import com.xbot.goodnotes.ui.component.SelectableItemsState
-import com.xbot.goodnotes.ui.component.rememberSelectableItemsState
 import com.xbot.goodnotes.ui.plus
-import com.xbot.goodnotes.ui.rememberSnackbarVisuals
 import com.xbot.ui.component.AnimatedFloatingActionButton
+import com.xbot.ui.component.LargeTopAppBarWithSelectionMode
+import com.xbot.ui.component.LazyVerticalStaggeredGridWithSelection
 import com.xbot.ui.component.NoteCard
 import com.xbot.ui.component.NoteCardDefaults
+import com.xbot.ui.component.Scaffold
 import com.xbot.ui.component.SelectableChip
 import com.xbot.ui.component.SelectableChipBadge
+import com.xbot.ui.component.SelectableItemsState
 import com.xbot.ui.component.ShapedIconToggleButton
 import com.xbot.ui.component.isScrollingUp
+import com.xbot.ui.component.rememberSelectableItemsState
 import com.xbot.ui.icon.Icons
 import com.xbot.ui.theme.NoteColors
 import com.xbot.ui.theme.harmonized
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.coroutines.launch
 
 @Composable
 fun NoteScreen(
@@ -86,25 +78,6 @@ private fun NoteScreenContent(
     val selectionState = rememberSelectableItemsState<Note>()
     val lazyGridState = rememberLazyStaggeredGridState()
 
-    val coroutineScope = rememberCoroutineScope()
-    val snackbarHostState = remember { SnackbarHostState() }
-    val snackbarVisuals = rememberSnackbarVisuals(
-        message = pluralStringResource(R.plurals.notes_delete_snackbar, selectionState.selectedCount, selectionState.selectedCount),
-        actionLabel = stringResource(R.string.notes_cancel_snackbar)
-    )
-
-    val onShowSnackBar: () -> Unit = {
-        coroutineScope.launch {
-            val result = snackbarHostState.showSnackbar(snackbarVisuals)
-            when (result) {
-                SnackbarResult.ActionPerformed -> {
-                    onAction(NoteScreenAction.UndoDelete)
-                }
-                SnackbarResult.Dismissed -> {}
-            }
-        }
-    }
-
     BackHandler(enabled = selectionState.inSelectionMode) {
         selectionState.clear()
     }
@@ -119,7 +92,6 @@ private fun NoteScreenContent(
                 },
                 onDeleteClick = {
                     onAction(NoteScreenAction.DeleteNotes(selectionState.selectedItems))
-                    onShowSnackBar()
                     selectionState.clear()
                 },
                 onMoreClick = {
@@ -138,14 +110,6 @@ private fun NoteScreenContent(
                     }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-            }
-        },
-        snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState) { data ->
-                Snackbar(
-                    snackbarData = data,
-                    shape = MaterialTheme.shapes.medium
-                )
             }
         },
         floatingActionButton = {
@@ -223,6 +187,7 @@ fun NoteScreenTopAppBar(
                         )
                     }
                 }
+
                 else -> {
                     IconButton(onClick = onSettingsClick) {
                         Icon(
@@ -276,7 +241,7 @@ private fun NoteLazyGrid(
     onCLickNoteCard: (Note) -> Unit,
     onFavoriteClick: (Note) -> Unit
 ) {
-    LazyVerticalStaggeredGrid(
+    LazyVerticalStaggeredGridWithSelection(
         modifier = modifier,
         columns = StaggeredGridCells.Adaptive(180.dp),
         state = state,
@@ -354,7 +319,7 @@ private fun NoteCard(
         },
         supportingContent = {
             Text(
-                text = note.dateTime,
+                text = note.timeStamp.convertToDateTime(),
                 style = MaterialTheme.typography.titleSmall
             )
         },

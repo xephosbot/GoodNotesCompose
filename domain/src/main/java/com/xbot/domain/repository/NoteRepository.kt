@@ -11,9 +11,9 @@ interface NoteRepository {
 
     suspend fun insertNote(note: NoteModel, folderId: Long = 0L)
 
-    suspend fun deleteNotes(notes: List<NoteModel>, folderId: Long = 0L)
+    suspend fun deleteNotes(notes: List<NoteModel>, folderId: Long = 0L, actionId: Long)
 
-    suspend fun restoreNotes()
+    suspend fun restoreNotes(actionId: Long)
 
     suspend fun updateNote(noteId: Long, isFavorite: Boolean)
 

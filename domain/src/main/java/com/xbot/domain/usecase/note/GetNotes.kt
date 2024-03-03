@@ -1,11 +1,11 @@
-package com.xbot.domain.usecase
+package com.xbot.domain.usecase.note
 
 import com.xbot.domain.model.NoteModel
 import com.xbot.domain.repository.NoteRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class GetNotesUseCase @Inject constructor(
+class GetNotes @Inject constructor(
     private val repository: NoteRepository
 ) {
     operator fun invoke(): Flow<List<NoteModel>> {

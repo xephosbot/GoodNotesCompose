@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.xbot.goodnotes.ui.component.Scaffold
+import com.xbot.ui.component.Scaffold
 import com.xbot.ui.theme.NoteColors
 import com.xbot.ui.theme.harmonized
 
@@ -29,7 +29,7 @@ fun NoteDetailScreen(
 
     NoteDetailScreenContent(
         state = state,
-        onEvent = viewModel::onAction,
+        onAction = viewModel::onAction,
         navigate = navigate
     )
 }
@@ -39,7 +39,7 @@ fun NoteDetailScreen(
 fun NoteDetailScreenContent(
     modifier: Modifier = Modifier,
     state: NoteDetailScreenState,
-    onEvent: (NoteDetailScreenEvent) -> Unit,
+    onAction: (NoteDetailScreenAction) -> Unit,
     navigate: () -> Unit
 ) {
     Scaffold(

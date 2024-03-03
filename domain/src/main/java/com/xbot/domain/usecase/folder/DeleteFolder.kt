@@ -1,13 +1,13 @@
-package com.xbot.domain.usecase
+package com.xbot.domain.usecase.folder
 
 import com.xbot.domain.model.FolderModel
 import com.xbot.domain.repository.FolderRepository
 import javax.inject.Inject
 
-class AddFolderUseCase @Inject constructor(
+class DeleteFolder @Inject constructor(
     private val repository: FolderRepository
 ) {
     suspend operator fun invoke(folder: FolderModel) {
-        repository.insertFolder(folder)
+        repository.deleteFolder(folder)
     }
 }

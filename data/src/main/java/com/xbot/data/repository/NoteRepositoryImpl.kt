@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
-import java.util.LinkedList
 import javax.inject.Inject
 
 class NoteRepositoryImpl @Inject constructor(
@@ -26,8 +25,7 @@ class NoteRepositoryImpl @Inject constructor(
 
     private val currentFolderId = MutableStateFlow(DEFAULT_FOLDER_ID)
 
-    private val deletedNotes = LinkedList<List<NoteEntity>>()
-    private val deletedCrossRefs = LinkedList<List<NoteFolderCrossRef>>()
+    private val deletedItems = mutableMapOf<Long, DeletedItems>()
 
     override val notes: Flow<List<NoteModel>> = currentFolderId.flatMapLatest { folderId ->
         val notesFlow = when (folderId) {
@@ -51,28 +49,30 @@ class NoteRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun deleteNotes(notes: List<NoteModel>, folderId: Long) {
-        if (folderId == DEFAULT_FOLDER_ID) {
-            val dataNotes = notes.map(NoteModel::mapToDataModel)
-            val crossRefs = notes.flatMap { note ->
-                noteFolderCrossRefDao.getCrossRefsForNote(note.id)
-            }
-            deletedNotes.add(dataNotes)
-            deletedCrossRefs.add(crossRefs)
-            noteDao.deleteAll(dataNotes)
-        } else {
-            val crossRefs = notes.map { note ->
-                NoteFolderCrossRef(note.id, folderId)
-            }
-            deletedNotes.add(listOf())
-            deletedCrossRefs.add(crossRefs)
-            noteFolderCrossRefDao.deleteAll(crossRefs)
+    override suspend fun deleteNotes(notes: List<NoteModel>, folderId: Long, actionId: Long) {
+        val dataNotes = when (folderId) {
+            DEFAULT_FOLDER_ID -> notes.map(NoteModel::mapToDataModel)
+            else -> emptyList()
+        }
+
+        val crossRefs = when (folderId) {
+            DEFAULT_FOLDER_ID -> notes.flatMap { note -> noteFolderCrossRefDao.getCrossRefsForNote(note.id) }
+            else -> notes.map { note -> NoteFolderCrossRef(note.id, folderId) }
+        }
+
+        deletedItems[actionId] = DeletedItems(notes = dataNotes, crossRefs = crossRefs)
+
+        when (folderId) {
+            DEFAULT_FOLDER_ID -> noteDao.deleteAll(dataNotes)
+            else -> noteFolderCrossRefDao.deleteAll(crossRefs)
         }
     }
 
-    override suspend fun restoreNotes() {
-        deletedNotes.poll()?.let { noteDao.insertAll(it) }
-        deletedCrossRefs.poll()?.let { noteFolderCrossRefDao.insertAll(it) }
+    override suspend fun restoreNotes(actionId: Long) {
+        deletedItems[actionId]?.let {
+            noteDao.insertAll(it.notes)
+            noteFolderCrossRefDao.insertAll(it.crossRefs)
+        }
     }
 
     override suspend fun updateNote(noteId: Long, isFavorite: Boolean) {
@@ -83,6 +83,11 @@ class NoteRepositoryImpl @Inject constructor(
     override suspend fun openFolder(folderId: Long) {
         currentFolderId.update { folderId }
     }
+
+    private data class DeletedItems(
+        val notes: List<NoteEntity>,
+        val crossRefs: List<NoteFolderCrossRef>
+    )
 
     companion object {
         private const val DEFAULT_FOLDER_ID = 0L

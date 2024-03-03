@@ -2,7 +2,7 @@ package com.xbot.goodnotes.ui.feature.detail
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.xbot.domain.usecase.GetNoteUseCase
+import com.xbot.domain.usecase.note.GetNote
 import com.xbot.goodnotes.ui.viewmodel.StatefulViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -11,8 +11,8 @@ import javax.inject.Inject
 @HiltViewModel
 class NoteDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val noteUseCase: GetNoteUseCase
-) : StatefulViewModel<NoteDetailScreenState, NoteDetailScreenEvent>(NoteDetailScreenState()) {
+    private val noteUseCase: GetNote
+) : StatefulViewModel<NoteDetailScreenState, NoteDetailScreenAction>(NoteDetailScreenState()) {
 
     private val noteId: Long = checkNotNull(savedStateHandle["noteId"])
 
@@ -31,9 +31,9 @@ class NoteDetailViewModel @Inject constructor(
         }
     }
 
-    override fun onAction(action: NoteDetailScreenEvent) {
+    override fun onAction(action: NoteDetailScreenAction) {
         when (action) {
-            is NoteDetailScreenEvent.Save -> {
+            is NoteDetailScreenAction.Save -> {
 
             }
         }

@@ -1,4 +1,4 @@
-package com.xbot.goodnotes.ui.component
+package com.xbot.ui.component
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -19,7 +19,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.xbot.ui.component.LargeTopAppBarTitleScale
 
 @ExperimentalAnimationApi
 @ExperimentalMaterial3Api

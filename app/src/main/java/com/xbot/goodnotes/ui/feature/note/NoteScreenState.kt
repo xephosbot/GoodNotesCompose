@@ -16,5 +16,4 @@ sealed interface NoteScreenAction {
     data class AddFolder(val name: String): NoteScreenAction
     data class UpdateNote(val note: Note, val isFavorite: Boolean): NoteScreenAction
     data class DeleteNotes(val notes: List<Note>): NoteScreenAction
-    data object UndoDelete : NoteScreenAction
 }
