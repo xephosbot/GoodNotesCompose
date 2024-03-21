@@ -8,11 +8,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
+import com.google.accompanist.navigation.material.rememberBottomSheetNavigator
 import com.xbot.goodnotes.ui.GoodNotesAppState
 import com.xbot.goodnotes.ui.feature.detail.NoteDetailScreen
 import com.xbot.goodnotes.ui.feature.note.NoteScreen
+import com.xbot.goodnotes.ui.feature.settings.SettingsScreenContent
 
+@OptIn(ExperimentalMaterialNavigationApi::class)
 @Composable
 fun GoodNotesNavHost(
     modifier: Modifier = Modifier,
@@ -20,28 +25,47 @@ fun GoodNotesNavHost(
     containerColor: Color = MaterialTheme.colorScheme.surface,
     startDestination: String = "notesScreen"
 ) {
-    NavHost(
-        modifier = modifier.background(containerColor),
-        navController = appState.navController,
-        startDestination = startDestination
+    val bottomSheetNavigator = rememberBottomSheetNavigator()
+    val navController = rememberNavController(bottomSheetNavigator)
+
+    ModalBottomSheetLayout(
+        bottomSheetNavigator = bottomSheetNavigator
     ) {
-        composable(
-            route = "notesScreen"
+        NavHost(
+            modifier = modifier.background(containerColor),
+            navController = navController,
+            startDestination = startDestination
         ) {
-            NoteScreen { noteId ->
-                appState.navController.navigate("noteDetailScreen/${noteId}") {
-                    restoreState = true
-                }
+            composable(
+                route = "notesScreen"
+            ) {
+                NoteScreen(
+                    navigateToDetails = { noteId ->
+                        navController.navigate("noteDetailScreen/${noteId}") {
+                            restoreState = true
+                        }
+                    },
+                    navigateToSettings = {
+                        navController.navigate("settingsScreen")
+                    }
+                )
             }
-        }
-        composable(
-            route = "noteDetailScreen/{$NOTE_ID_ARG}",
-            arguments = listOf(
-                navArgument(name = NOTE_ID_ARG) { type = NavType.LongType }
-            )
-        ) {
-            NoteDetailScreen {
-                appState.navController.popBackStack()
+            composable(
+                route = "noteDetailScreen/{$NOTE_ID_ARG}",
+                arguments = listOf(
+                    navArgument(name = NOTE_ID_ARG) { type = NavType.LongType }
+                )
+            ) {
+                NoteDetailScreen(
+                    navigateBack = {
+                        navController.popBackStack()
+                    }
+                )
+            }
+            bottomSheet(
+                route = "settingsScreen"
+            ) {
+                SettingsScreenContent()
             }
         }
     }
