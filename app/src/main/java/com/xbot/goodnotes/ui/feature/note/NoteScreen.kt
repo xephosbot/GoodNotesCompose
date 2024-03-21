@@ -55,14 +55,16 @@ import kotlinx.collections.immutable.ImmutableList
 @Composable
 fun NoteScreen(
     viewModel: NoteViewModel = hiltViewModel(),
-    onNavigate: (Long) -> Unit
+    navigateToDetails: (Long) -> Unit,
+    navigateToSettings: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     NoteScreenContent(
         state = state,
         onAction = viewModel::onAction,
-        onNavigate = onNavigate
+        navigateToDetails = navigateToDetails,
+        navigateToSettings = navigateToSettings
     )
 }
 
@@ -72,7 +74,8 @@ private fun NoteScreenContent(
     modifier: Modifier = Modifier,
     state: NoteScreenState,
     onAction: (NoteScreenAction) -> Unit,
-    onNavigate: (Long) -> Unit
+    navigateToDetails: (Long) -> Unit,
+    navigateToSettings: () -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val selectionState = rememberSelectableItemsState<Note>()
@@ -88,7 +91,7 @@ private fun NoteScreenContent(
             NoteScreenTopAppBar(
                 selectionState = selectionState,
                 onSettingsClick = {
-                    //TODO: navigate to settings screen
+                    navigateToSettings()
                 },
                 onDeleteClick = {
                     onAction(NoteScreenAction.DeleteNotes(selectionState.selectedItems))
@@ -104,9 +107,10 @@ private fun NoteScreenContent(
             ) {
                 FolderLazyRow(
                     items = state.foldersList,
-                    isFolderSelected = { it.id == state.currentFolderId },
-                    onFolderClick = { folder ->
-                        onAction(NoteScreenAction.OpenFolder(folder.id))
+                    allNoteCount = state.noteCount,
+                    isFolderSelected = { it == state.currentFolderId },
+                    onFolderClick = { folderId ->
+                        onAction(NoteScreenAction.OpenFolder(folderId))
                     }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -131,7 +135,7 @@ private fun NoteScreenContent(
             refreshKey = state.currentFolderId,
             contentPadding = innerPadding + PaddingValues(horizontal = 4.dp),
             onCLickNoteCard = { note ->
-                onNavigate(note.id)
+                navigateToDetails(note.id)
             },
             onFavoriteClick = { note ->
                 onAction(NoteScreenAction.UpdateNote(note, !note.isFavorite))
@@ -207,21 +211,31 @@ fun NoteScreenTopAppBar(
 private fun FolderLazyRow(
     modifier: Modifier = Modifier,
     items: List<Folder>,
-    isFolderSelected: (Folder) -> Boolean,
-    onFolderClick: (Folder) -> Unit
+    allNoteCount: Int,
+    isFolderSelected: (Long) -> Boolean,
+    onFolderClick: (Long) -> Unit
 ) {
     LazyRow(
         modifier = modifier,
         contentPadding = PaddingValues(horizontal = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+        item {
+            SelectableChip(
+                selected = isFolderSelected(DEFAULT_FOLDER_ID),
+                onClick = { onFolderClick(DEFAULT_FOLDER_ID) },
+                label = { Text(text = stringResource(R.string.folder_all_title)) },
+                leadingIcon = { SelectableChipBadge(text = allNoteCount.toString()) }
+            )
+        }
+
         items(
             items = items,
             key = { it.id }
         ) { folder ->
             SelectableChip(
-                selected = isFolderSelected(folder),
-                onClick = { onFolderClick(folder) },
+                selected = isFolderSelected(folder.id),
+                onClick = { onFolderClick(folder.id) },
                 label = { Text(text = folder.name) },
                 leadingIcon = { SelectableChipBadge(text = folder.noteCount.toString()) }
             )
@@ -335,3 +349,5 @@ private fun NoteCard(
         onLongClick = { onLongClick() }
     )
 }
+
+private const val DEFAULT_FOLDER_ID = 0L

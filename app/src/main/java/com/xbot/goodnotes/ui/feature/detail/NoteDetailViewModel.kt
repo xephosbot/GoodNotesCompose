@@ -11,14 +11,14 @@ import javax.inject.Inject
 @HiltViewModel
 class NoteDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val noteUseCase: GetNote
+    private val getNote: GetNote
 ) : StatefulViewModel<NoteDetailScreenState, NoteDetailScreenAction>(NoteDetailScreenState()) {
 
     private val noteId: Long = checkNotNull(savedStateHandle["noteId"])
 
     init {
         viewModelScope.launch {
-            noteUseCase(noteId)?.let { note ->
+            getNote(noteId)?.let { note ->
                 updateState {
                     copy(
                         noteId = note.id,

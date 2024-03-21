@@ -9,6 +9,8 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
@@ -20,7 +22,7 @@ object Icons {
     val Delete = Icons.Filled.Delete
     val MoreVert = Icons.Filled.MoreVert
     val Settings = Icons.Filled.Settings
-    val Favorite = Icons.Filled.Favorite
-    val FavoriteBorder = Icons.Filled.FavoriteBorder
+    val Favorite = Icons.Filled.Star
+    val FavoriteBorder = Icons.Filled.StarBorder
     val Done = Icons.Filled.Done
 }

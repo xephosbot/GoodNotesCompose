@@ -23,14 +23,14 @@ import com.xbot.ui.theme.harmonized
 @Composable
 fun NoteDetailScreen(
     viewModel: NoteDetailViewModel = hiltViewModel(),
-    navigate: () -> Unit
+    navigateBack: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     NoteDetailScreenContent(
         state = state,
         onAction = viewModel::onAction,
-        navigate = navigate
+        navigateBack = navigateBack
     )
 }
 
@@ -40,14 +40,14 @@ fun NoteDetailScreenContent(
     modifier: Modifier = Modifier,
     state: NoteDetailScreenState,
     onAction: (NoteDetailScreenAction) -> Unit,
-    navigate: () -> Unit
+    navigateBack: () -> Unit
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text(text = state.noteTitle) },
                 navigationIcon = {
-                    IconButton(onClick = navigate) {
+                    IconButton(onClick = navigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = ""

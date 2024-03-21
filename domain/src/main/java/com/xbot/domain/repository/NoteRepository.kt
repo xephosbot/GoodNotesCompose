@@ -7,6 +7,8 @@ interface NoteRepository {
 
     val notes: Flow<List<NoteModel>>
 
+    val noteCount: Flow<Int>
+
     suspend fun getNote(noteId: Long): NoteModel?
 
     suspend fun insertNote(note: NoteModel, folderId: Long = 0L)
@@ -16,6 +18,4 @@ interface NoteRepository {
     suspend fun restoreNotes(actionId: Long)
 
     suspend fun updateNote(noteId: Long, isFavorite: Boolean)
-
-    suspend fun openFolder(folderId: Long)
 }

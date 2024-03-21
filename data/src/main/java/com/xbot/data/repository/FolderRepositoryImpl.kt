@@ -1,30 +1,30 @@
 package com.xbot.data.repository
 
-import android.content.Context
-import com.xbot.data.R
+import com.xbot.data.dao.FolderDao
 import com.xbot.data.mapToDataModel
 import com.xbot.data.mapToDomainModel
-import com.xbot.data.prepend
-import com.xbot.data.source.FolderDao
-import com.xbot.data.source.NoteDao
+import com.xbot.data.model.note.NoteEntity
 import com.xbot.domain.model.FolderModel
+import com.xbot.domain.model.NoteModel
 import com.xbot.domain.repository.FolderRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class FolderRepositoryImpl @Inject constructor(
-    private val context: Context,
-    private val noteDao: NoteDao,
     private val folderDao: FolderDao
 ) : FolderRepository {
 
     override val folders: Flow<List<FolderModel>> = folderDao.getFoldersWithNoteCount()
-        .combine(noteDao.getNoteCount()) { foldersWithNoteCount, noteCount ->
+        .map { foldersWithNoteCount ->
             foldersWithNoteCount.map { (folder, noteCount) ->
                 folder.mapToDomainModel(noteCount)
-            }.prepend(FolderModel(0L, context.getString(R.string.data_folder_all_title), noteCount))
+            }
         }
+
+    override fun getNotesFromFolder(folderId: Long): Flow<List<NoteModel>> {
+        return folderDao.getFolderWithNotes(folderId).map { it.notes.map(NoteEntity::mapToDomainModel) }
+    }
 
     override suspend fun insertFolder(folder: FolderModel) {
         folderDao.insert(folder.mapToDataModel())

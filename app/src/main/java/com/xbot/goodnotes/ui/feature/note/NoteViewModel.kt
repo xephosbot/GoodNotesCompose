@@ -1,15 +1,20 @@
 package com.xbot.goodnotes.ui.feature.note
 
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.xbot.domain.model.FolderModel
 import com.xbot.domain.model.NoteModel
-import com.xbot.domain.usecase.FolderUseCase
-import com.xbot.domain.usecase.NoteUseCase
+import com.xbot.domain.usecase.folder.AddFolder
+import com.xbot.domain.usecase.folder.GetFolders
+import com.xbot.domain.usecase.note.DeleteNotes
+import com.xbot.domain.usecase.note.GetNoteCount
+import com.xbot.domain.usecase.note.GetNotes
+import com.xbot.domain.usecase.note.RestoreNotes
+import com.xbot.domain.usecase.note.UpdateNote
 import com.xbot.goodnotes.R
 import com.xbot.goodnotes.mapToDomainModel
 import com.xbot.goodnotes.mapToUIModel
 import com.xbot.goodnotes.model.Note
-import com.xbot.goodnotes.ui.viewmodel.StatefulViewModel
 import com.xbot.ui.component.Message
 import com.xbot.ui.component.MessageAction
 import com.xbot.ui.component.MessageContent
@@ -17,78 +22,84 @@ import com.xbot.ui.component.SnackbarManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
 class NoteViewModel @Inject constructor(
-    private val snackbarManager: SnackbarManager,
-    private val noteUseCase: NoteUseCase,
-    private val folderUseCase: FolderUseCase
-) : StatefulViewModel<NoteScreenState, NoteScreenAction>(NoteScreenState()) {
-    init {
-        viewModelScope.launch(Dispatchers.IO) {
-            noteUseCase.getNotes().onEach { notesList ->
-                updateState {
-                    copy(
-                        notesList = notesList.map(NoteModel::mapToUIModel).toImmutableList()
-                    )
-                }
-            }.launchIn(this)
+    private val getNotes: GetNotes,
+    private val getFolders: GetFolders,
+    private val getNoteCount: GetNoteCount,
+    private val addFolder: AddFolder,
+    private val updateNote: UpdateNote,
+    private val deleteNotes: DeleteNotes,
+    private val restoreNotes: RestoreNotes,
+    private val snackbarManager: SnackbarManager
+) : ViewModel() {
 
-            folderUseCase.getFolders().onEach { foldersList ->
-                updateState {
-                    copy(
-                        foldersList = foldersList.map(FolderModel::mapToUIModel).toImmutableList()
-                    )
-                }
-            }.launchIn(this)
-        }
-    }
+    private val currentFolderId = MutableStateFlow(DEFAULT_FOLDER_ID)
+    private val notes = currentFolderId.flatMapLatest { getNotes(it) }
 
-    override fun onAction(action: NoteScreenAction) {
+    val state: StateFlow<NoteScreenState> = combine(
+        notes, getFolders(), getNoteCount()
+    ) { notesList, foldersList, noteCount ->
+        NoteScreenState(
+            notesList = notesList.map(NoteModel::mapToUIModel).toImmutableList(),
+            foldersList = foldersList.map(FolderModel::mapToUIModel).toImmutableList(),
+            noteCount = noteCount,
+            currentFolderId = currentFolderId.value
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000L),
+        initialValue = NoteScreenState()
+    )
+
+    fun onAction(action: NoteScreenAction) {
         when (action) {
             is NoteScreenAction.OpenFolder -> {
-                updateState { copy(currentFolderId = action.folderId) }
-                viewModelScope.launch(Dispatchers.IO) {
-                    folderUseCase.openFolder(state.value.currentFolderId)
-                }
+                currentFolderId.update { action.folderId }
             }
 
             is NoteScreenAction.AddFolder -> {
                 val folder = FolderModel(name = action.name, noteCount = 0)
                 viewModelScope.launch(Dispatchers.IO) {
-                    folderUseCase.addFolder(folder)
+                    addFolder(folder)
                 }
             }
 
             is NoteScreenAction.UpdateNote -> {
                 viewModelScope.launch(Dispatchers.IO) {
-                    noteUseCase.updateNote(action.note.id, action.isFavorite)
+                    updateNote(action.note.id, action.isFavorite)
                 }
             }
 
             is NoteScreenAction.DeleteNotes -> {
                 val actionId = UUID.randomUUID().mostSignificantBits
                 viewModelScope.launch(Dispatchers.IO) {
-                    noteUseCase.deleteNotes(
-                        action.notes.map(Note::mapToDomainModel),
-                        state.value.currentFolderId,
-                        actionId
+                    deleteNotes(
+                        notes = action.notes.map(Note::mapToDomainModel),
+                        folderId = state.value.currentFolderId,
+                        actionId = actionId
                     )
                     snackbarManager.showMessage(
                         Message(
                             id = actionId,
                             title = MessageContent.Plurals(
-                                R.plurals.notes_delete_snackbar,
-                                action.notes.count()
+                                pluralsId = R.plurals.notes_delete_snackbar,
+                                quantity = action.notes.count()
                             ),
                             action = MessageAction(textId = R.string.notes_cancel_snackbar) {
                                 viewModelScope.launch(Dispatchers.IO) {
-                                    noteUseCase.restoreNotes(actionId)
+                                    restoreNotes(actionId)
                                 }
                             }
                         )
@@ -96,5 +107,9 @@ class NoteViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    companion object {
+        private const val DEFAULT_FOLDER_ID = 0L
     }
 }

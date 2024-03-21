@@ -8,6 +8,7 @@ import kotlinx.collections.immutable.persistentListOf
 data class NoteScreenState(
     val notesList: ImmutableList<Note> = persistentListOf(),
     val foldersList: ImmutableList<Folder> = persistentListOf(),
+    val noteCount: Int = 0,
     val currentFolderId: Long = 0L
 )
 

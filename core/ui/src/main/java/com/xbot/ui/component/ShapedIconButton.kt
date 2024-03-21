@@ -88,7 +88,7 @@ fun ShapedIconToggleButton(
                 role = Role.Checkbox,
                 interactionSource = interactionSource,
                 indication = rememberRipple(
-                    bounded = true,
+                    bounded = true
                 )
             ),
         contentAlignment = Alignment.Center

@@ -1,4 +1,4 @@
-package com.xbot.data.source
+package com.xbot.data.dao
 
 import androidx.room.Dao
 import androidx.room.Delete

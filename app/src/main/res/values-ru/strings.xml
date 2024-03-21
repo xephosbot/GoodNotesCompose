@@ -2,6 +2,7 @@
 <resources>
     <string name="app_name">GoodNotes</string>
     <string name="my_notes_title">Мои\nЗаметки</string>
+    <string name="folder_all_title">Все</string>
     <string name="notes_count_title">Заметки:\n%1$d</string>
     <string name="notes_cancel_snackbar">Отменить</string>
     <plurals name="notes_delete_snackbar">
