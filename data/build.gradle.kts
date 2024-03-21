@@ -15,6 +15,9 @@ dependencies {
     // Project-level dependencies
     implementation(project(":domain"))
 
+    // AndroidX dependencies
+    implementation(libs.androidx.dataStore)
+
     // Kotlin dependencies
     implementation(libs.kotlinx.datetime)
 
