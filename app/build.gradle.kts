@@ -18,6 +18,10 @@ android {
         }
     }
 
+    androidResources {
+        generateLocaleConfig = true
+    }
+
     signingConfigs {
         named("debug") {
             storeFile = rootProject.file("debug.keystore")
@@ -61,10 +65,14 @@ dependencies {
     // AndroidX dependencies
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.lifecycle.runtimeCompose)
     implementation(libs.androidx.lifecycle.viewModelCompose)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.hilt.navigation.compose)
+
+    // Accompanist dependencies
+    implementation(libs.accompanist.navigation)
 
     // Compose dependencies
     implementation(libs.androidx.compose.runtime)
