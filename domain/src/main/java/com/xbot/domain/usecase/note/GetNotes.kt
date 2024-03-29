@@ -1,5 +1,6 @@
 package com.xbot.domain.usecase.note
 
+import com.xbot.common.Constants
 import com.xbot.domain.model.NoteModel
 import com.xbot.domain.repository.FolderRepository
 import com.xbot.domain.repository.NoteRepository
@@ -13,14 +14,13 @@ class GetNotes @Inject constructor(
 ) {
     operator fun invoke(folderId: Long): Flow<List<NoteModel>> {
         return when (folderId) {
-            DEFAULT_FOLDER_ID -> noteRepository.notes
+            Constants.DEFAULT_FOLDER_ID -> noteRepository.notes
+            Constants.FAVORITE_FOLDER_ID -> noteRepository.notes.map { noteList ->
+                noteList.filter { it.isFavorite }
+            }
             else -> folderRepository.getNotesFromFolder(folderId)
         }.map { noteList ->
             noteList.sortedByDescending { it.timeStamp }
         }
-    }
-
-    companion object {
-        private const val DEFAULT_FOLDER_ID = 0L
     }
 }

@@ -30,6 +30,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.xbot.common.Constants
 import com.xbot.goodnotes.R
 import com.xbot.goodnotes.convertToDateTime
 import com.xbot.goodnotes.model.Folder
@@ -107,7 +108,7 @@ private fun NoteScreenContent(
             ) {
                 FolderLazyRow(
                     items = state.foldersList,
-                    allNoteCount = state.noteCount,
+                    noteCount = state.noteCount,
                     isFolderSelected = { it == state.currentFolderId },
                     onFolderClick = { folderId ->
                         onAction(NoteScreenAction.OpenFolder(folderId))
@@ -118,7 +119,7 @@ private fun NoteScreenContent(
         },
         floatingActionButton = {
             AnimatedFloatingActionButton(
-                onClick = { /*TODO*/ },
+                onClick = { navigateToDetails(Constants.NEW_NOTE_ID) },
                 visible = lazyGridState.isScrollingUp().value && !selectionState.inSelectionMode
             ) {
                 Icon(
@@ -211,7 +212,7 @@ fun NoteScreenTopAppBar(
 private fun FolderLazyRow(
     modifier: Modifier = Modifier,
     items: List<Folder>,
-    allNoteCount: Int,
+    noteCount: Int,
     isFolderSelected: (Long) -> Boolean,
     onFolderClick: (Long) -> Unit
 ) {
@@ -222,10 +223,19 @@ private fun FolderLazyRow(
     ) {
         item {
             SelectableChip(
-                selected = isFolderSelected(DEFAULT_FOLDER_ID),
-                onClick = { onFolderClick(DEFAULT_FOLDER_ID) },
+                selected = isFolderSelected(Constants.DEFAULT_FOLDER_ID),
+                onClick = { onFolderClick(Constants.DEFAULT_FOLDER_ID) },
                 label = { Text(text = stringResource(R.string.folder_all_title)) },
-                leadingIcon = { SelectableChipBadge(text = allNoteCount.toString()) }
+                leadingIcon = { SelectableChipBadge(text = noteCount.toString()) }
+            )
+        }
+
+        item {
+            SelectableChip(
+                selected = isFolderSelected(Constants.FAVORITE_FOLDER_ID),
+                onClick = { onFolderClick(Constants.FAVORITE_FOLDER_ID) },
+                label = { Text(text = stringResource(R.string.folder_favorite_title)) },
+                leadingIcon = { SelectableChipBadge(text = noteCount.toString()) }
             )
         }
 
@@ -237,7 +247,7 @@ private fun FolderLazyRow(
                 selected = isFolderSelected(folder.id),
                 onClick = { onFolderClick(folder.id) },
                 label = { Text(text = folder.name) },
-                leadingIcon = { SelectableChipBadge(text = folder.noteCount.toString()) }
+                leadingIcon = { SelectableChipBadge(text = noteCount.toString()) }
             )
         }
     }
@@ -349,5 +359,3 @@ private fun NoteCard(
         onLongClick = { onLongClick() }
     )
 }
-
-private const val DEFAULT_FOLDER_ID = 0L
