@@ -13,6 +13,7 @@ android {
 
 dependencies {
     // Project-level dependencies
+    implementation(project(":core:common"))
     implementation(project(":domain"))
 
     // AndroidX dependencies

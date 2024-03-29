@@ -8,6 +8,9 @@ android {
 }
 
 dependencies {
+    // Project-level dependencies
+    implementation(project(":core:common"))
+
     // Testing dependencies
     androidTestImplementation(libs.androidx.test.espresso.core)
     androidTestImplementation(libs.androidx.test.ext)
