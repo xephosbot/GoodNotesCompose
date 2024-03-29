@@ -2,12 +2,12 @@ package com.xbot.goodnotes.ui.feature.note
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.xbot.common.Constants
 import com.xbot.domain.model.FolderModel
 import com.xbot.domain.model.NoteModel
 import com.xbot.domain.usecase.folder.AddFolder
 import com.xbot.domain.usecase.folder.GetFolders
 import com.xbot.domain.usecase.note.DeleteNotes
-import com.xbot.domain.usecase.note.GetNoteCount
 import com.xbot.domain.usecase.note.GetNotes
 import com.xbot.domain.usecase.note.RestoreNotes
 import com.xbot.domain.usecase.note.UpdateNote
@@ -37,7 +37,6 @@ import javax.inject.Inject
 class NoteViewModel @Inject constructor(
     private val getNotes: GetNotes,
     private val getFolders: GetFolders,
-    private val getNoteCount: GetNoteCount,
     private val addFolder: AddFolder,
     private val updateNote: UpdateNote,
     private val deleteNotes: DeleteNotes,
@@ -45,16 +44,16 @@ class NoteViewModel @Inject constructor(
     private val snackbarManager: SnackbarManager
 ) : ViewModel() {
 
-    private val currentFolderId = MutableStateFlow(DEFAULT_FOLDER_ID)
+    private val currentFolderId = MutableStateFlow(Constants.DEFAULT_FOLDER_ID)
     private val notes = currentFolderId.flatMapLatest { getNotes(it) }
 
     val state: StateFlow<NoteScreenState> = combine(
-        notes, getFolders(), getNoteCount()
-    ) { notesList, foldersList, noteCount ->
+        notes, getFolders()
+    ) { notesList, foldersList ->
         NoteScreenState(
             notesList = notesList.map(NoteModel::mapToUIModel).toImmutableList(),
             foldersList = foldersList.map(FolderModel::mapToUIModel).toImmutableList(),
-            noteCount = noteCount,
+            noteCount = notesList.count(),
             currentFolderId = currentFolderId.value
         )
     }.stateIn(
@@ -70,7 +69,7 @@ class NoteViewModel @Inject constructor(
             }
 
             is NoteScreenAction.AddFolder -> {
-                val folder = FolderModel(name = action.name, noteCount = 0)
+                val folder = FolderModel(name = action.name)
                 viewModelScope.launch(Dispatchers.IO) {
                     addFolder(folder)
                 }
@@ -107,9 +106,5 @@ class NoteViewModel @Inject constructor(
                 }
             }
         }
-    }
-
-    companion object {
-        private const val DEFAULT_FOLDER_ID = 0L
     }
 }

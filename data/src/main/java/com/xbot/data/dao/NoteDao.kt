@@ -23,9 +23,6 @@ interface NoteDao {
     @Query("SELECT * FROM notes WHERE noteId = :noteId")
     suspend fun getNote(noteId: Long): NoteEntity?
 
-    @Query("SELECT COUNT(*) FROM notes")
-    fun getNoteCount(): Flow<Int>
-
     @Delete
     suspend fun delete(note: NoteEntity)
 

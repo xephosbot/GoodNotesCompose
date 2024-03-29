@@ -1,5 +1,6 @@
 package com.xbot.data.repository
 
+import com.xbot.common.Constants
 import com.xbot.data.dao.NoteDao
 import com.xbot.data.dao.NoteFolderCrossRefDao
 import com.xbot.data.mapToDataModel
@@ -23,15 +24,13 @@ class NoteRepositoryImpl @Inject constructor(
     override val notes: Flow<List<NoteModel>> =
         noteDao.getNotes().map { it.map(NoteEntity::mapToDomainModel) }
 
-    override val noteCount: Flow<Int> = noteDao.getNoteCount()
-
     override suspend fun getNote(noteId: Long): NoteModel? {
         return noteDao.getNote(noteId)?.mapToDomainModel()
     }
 
     override suspend fun insertNote(note: NoteModel, folderId: Long) {
         val noteId = noteDao.insert(note.mapToDataModel())
-        if (folderId != DEFAULT_FOLDER_ID) {
+        if (folderId != Constants.DEFAULT_FOLDER_ID) {
             val crossRef = NoteFolderCrossRef(noteId, folderId)
             noteFolderCrossRefDao.insert(crossRef)
         }
@@ -39,12 +38,12 @@ class NoteRepositoryImpl @Inject constructor(
 
     override suspend fun deleteNotes(notes: List<NoteModel>, folderId: Long, actionId: Long) {
         val dataNotes = when (folderId) {
-            DEFAULT_FOLDER_ID -> notes.map(NoteModel::mapToDataModel)
+            Constants.DEFAULT_FOLDER_ID -> notes.map(NoteModel::mapToDataModel)
             else -> emptyList()
         }
 
         val crossRefs = when (folderId) {
-            DEFAULT_FOLDER_ID -> notes.flatMap { note ->
+            Constants.DEFAULT_FOLDER_ID -> notes.flatMap { note ->
                 noteFolderCrossRefDao.getCrossRefsForNote(note.id)
             }
             else -> notes.map { note -> NoteFolderCrossRef(note.id, folderId) }
@@ -53,7 +52,7 @@ class NoteRepositoryImpl @Inject constructor(
         deletedItems[actionId] = DeletedItems(notes = dataNotes, crossRefs = crossRefs)
 
         when (folderId) {
-            DEFAULT_FOLDER_ID -> noteDao.deleteAll(dataNotes)
+            Constants.DEFAULT_FOLDER_ID -> noteDao.deleteAll(dataNotes)
             else -> noteFolderCrossRefDao.deleteAll(crossRefs)
         }
     }
@@ -74,8 +73,4 @@ class NoteRepositoryImpl @Inject constructor(
         val notes: List<NoteEntity>,
         val crossRefs: List<NoteFolderCrossRef>
     )
-
-    companion object {
-        private const val DEFAULT_FOLDER_ID = 0L
-    }
 }

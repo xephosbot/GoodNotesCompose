@@ -14,7 +14,7 @@ internal fun NoteModel.mapToUIModel() =
     Note(id, title, content, isFavorite, timeStamp, colorId)
 
 internal fun FolderModel.mapToUIModel() =
-    Folder(id, name, noteCount)
+    Folder(id, name)
 
 internal fun Note.mapToDomainModel() =
     NoteModel(id, title, content, isFavorite, timeStamp, colorId)

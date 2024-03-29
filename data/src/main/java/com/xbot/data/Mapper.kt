@@ -9,8 +9,8 @@ import com.xbot.domain.model.NoteModel
 internal fun NoteEntity.mapToDomainModel() =
     NoteModel(noteId, title, content, isFavorite, timeStamp, colorId)
 
-internal fun FolderEntity.mapToDomainModel(noteCount: Int) =
-    FolderModel(folderId, name, noteCount)
+internal fun FolderEntity.mapToDomainModel() =
+    FolderModel(folderId, name)
 
 internal fun NoteModel.mapToDataModel() =
     NoteEntity(id, title, content, isFavorite, timeStamp, colorId)

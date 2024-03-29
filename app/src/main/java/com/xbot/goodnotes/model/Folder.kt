@@ -5,6 +5,5 @@ import androidx.compose.runtime.Stable
 @Stable
 data class Folder(
     val id: Long = 0L,
-    val name: String,
-    val noteCount: Int
+    val name: String
 )
