@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.xbot.goodnotes.ui.changeStatusBarAppearance
 import com.xbot.ui.component.Scaffold
 import com.xbot.ui.theme.NoteColors
 import com.xbot.ui.theme.harmonized
@@ -26,6 +27,8 @@ fun NoteDetailScreen(
     navigateBack: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    changeStatusBarAppearance(isLightAppearance = false)
 
     NoteDetailScreenContent(
         state = state,
