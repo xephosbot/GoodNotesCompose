@@ -1,6 +1,7 @@
 package com.xbot.ui.component
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.expandIn
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -27,6 +28,8 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
@@ -40,6 +43,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun SelectableChip(
     modifier: Modifier = Modifier,
@@ -48,7 +52,7 @@ fun SelectableChip(
     label: @Composable () -> Unit,
     labelTextStyle: TextStyle = MaterialTheme.typography.titleLarge,
     enabled: Boolean = true,
-    leadingIcon: @Composable (() -> Unit)? = null,
+    leadingIcon: @Composable (SelectableChipScope.() -> Unit)? = null,
     shape: Shape = SelectableChipDefaults.shape,
     colors: SelectableChipColors = SelectableChipDefaults.selectableChipColors(),
     border: SelectableChipBorder = SelectableChipDefaults.selectableChipBorder(),
@@ -79,7 +83,10 @@ fun SelectableChip(
                         enter = enterTransition(),
                         exit = exitTransition()
                     ) {
-                        leadingIcon()
+                        val scope = remember(transition.isRunning, selected) {
+                            SelectableChipScopeImpl(transition.isRunning && selected)
+                        }
+                        scope.leadingIcon()
                     }
                 }
             } else null,
@@ -139,7 +146,7 @@ private fun exitTransition() = scaleOut(targetScale = 0.8f) + shrinkOut(
 ) + fadeOut()
 
 @Composable
-fun SelectableChipBadge(
+fun SelectableChipScope.SelectableChipBadge(
     modifier: Modifier = Modifier,
     text: String,
     contentColor: Color = MaterialTheme.colorScheme.onPrimary,
@@ -147,6 +154,8 @@ fun SelectableChipBadge(
     shape: Shape = MaterialTheme.shapes.extraSmall,
     color: Color = MaterialTheme.colorScheme.primary
 ) {
+    val currentText by remember(shouldUpdateLabel) { mutableStateOf(text) }
+
     Surface(
         modifier = modifier
             .defaultMinSize(
@@ -162,12 +171,21 @@ fun SelectableChipBadge(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = text,
+                text = currentText,
                 style = style
             )
         }
     }
 }
+
+interface SelectableChipScope {
+
+    val shouldUpdateLabel: Boolean
+}
+
+private class SelectableChipScopeImpl(
+    override val shouldUpdateLabel: Boolean
+) : SelectableChipScope
 
 @Immutable
 class SelectableChipColors internal constructor(

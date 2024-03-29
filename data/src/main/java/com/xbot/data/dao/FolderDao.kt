@@ -3,13 +3,11 @@ package com.xbot.data.dao
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
-import androidx.room.MapColumn
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import com.xbot.data.model.folder.FolderEntity
 import com.xbot.data.model.folder.FolderWithNotes
-import com.xbot.data.model.note.NoteEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao

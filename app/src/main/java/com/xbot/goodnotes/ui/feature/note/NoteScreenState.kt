@@ -1,5 +1,6 @@
 package com.xbot.goodnotes.ui.feature.note
 
+import com.xbot.common.Constants
 import com.xbot.goodnotes.model.Folder
 import com.xbot.goodnotes.model.Note
 import kotlinx.collections.immutable.ImmutableList
@@ -9,7 +10,7 @@ data class NoteScreenState(
     val notesList: ImmutableList<Note> = persistentListOf(),
     val foldersList: ImmutableList<Folder> = persistentListOf(),
     val noteCount: Int = 0,
-    val currentFolderId: Long = 0L
+    val currentFolderId: Long = Constants.DEFAULT_FOLDER_ID
 )
 
 sealed interface NoteScreenAction {
