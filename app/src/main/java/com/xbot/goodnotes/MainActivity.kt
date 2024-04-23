@@ -1,6 +1,9 @@
 package com.xbot.goodnotes
 
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 import android.os.Bundle
+import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -8,10 +11,13 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.splashscreen.SplashScreenViewProvider
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.xbot.goodnotes.ui.FastOutLinearInInterpolator
 import com.xbot.goodnotes.ui.GoodNotesApp
 import com.xbot.goodnotes.ui.enableEdgeToEdge
 import com.xbot.goodnotes.ui.shouldUseDarkTheme
@@ -41,6 +47,10 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+        splashScreen.setOnExitAnimationListener { splashScreenViewProvider ->
+            onSplashScreenExit(splashScreenViewProvider)
+        }
+
         splashScreen.setKeepOnScreenCondition {
             when (uiState) {
                 MainActivityUiState.Loading -> true
@@ -65,5 +75,26 @@ class MainActivity : ComponentActivity() {
                 GoodNotesApp()
             }
         }
+    }
+
+    private fun onSplashScreenExit(splashScreenViewProvider: SplashScreenViewProvider) {
+        val accelerateInterpolator = FastOutLinearInInterpolator()
+        val splashScreenView = splashScreenViewProvider.view
+        val iconView = splashScreenViewProvider.iconView
+
+        val animatorSet = AnimatorSet()
+        animatorSet.playTogether(
+            ObjectAnimator.ofFloat(splashScreenView, View.ALPHA, 1f, 0f),
+            ObjectAnimator.ofFloat(iconView, View.ALPHA, 1f, 0f)
+        )
+        animatorSet.duration = SPLASHSCREEN_ALPHA_ANIMATION_DURATION
+        animatorSet.interpolator = accelerateInterpolator
+
+        animatorSet.doOnEnd { splashScreenViewProvider.remove() }
+        animatorSet.start()
+    }
+
+    companion object {
+        private const val SPLASHSCREEN_ALPHA_ANIMATION_DURATION = 200L
     }
 }
