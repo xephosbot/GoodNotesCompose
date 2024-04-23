@@ -1,5 +1,6 @@
 package com.xbot.ui.component
 
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -22,6 +23,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -31,6 +33,7 @@ fun ShapedIconButton(
     enabled: Boolean = true,
     colors: ShapedIconButtonColors = ShapedIconButtonDefaults.shapedIconButtonColors(),
     shape: Shape = ShapedIconButtonDefaults.shape,
+    size: Dp = ShapedIconButtonDefaults.Size,
     interactionSource: MutableInteractionSource? = null,
     content: @Composable () -> Unit
 ) {
@@ -40,8 +43,7 @@ fun ShapedIconButton(
 
     Box(
         modifier = modifier
-            .minimumInteractiveComponentSize()
-            .size(ShapedIconButtonDefaults.Size)
+            .size(size)
             .clip(shape)
             .background(color = colors.containerColor(enabled).value)
             .clickable(
@@ -49,9 +51,7 @@ fun ShapedIconButton(
                 enabled = enabled,
                 role = Role.Button,
                 interactionSource = interactionSource,
-                indication = rememberRipple(
-                    bounded = true
-                )
+                indication = LocalIndication.current
             ),
         contentAlignment = Alignment.Center
     ) {
@@ -68,6 +68,7 @@ fun ShapedIconToggleButton(
     enabled: Boolean = true,
     colors: ShapedIconToggleButtonColors = ShapedIconButtonDefaults.shapedIconToggleButtonColors(),
     shape: Shape = ShapedIconButtonDefaults.shape,
+    size: Dp = ShapedIconButtonDefaults.Size,
     interactionSource: MutableInteractionSource? = null,
     content: @Composable () -> Unit
 ) {
@@ -77,8 +78,7 @@ fun ShapedIconToggleButton(
 
     Box(
         modifier = modifier
-            .minimumInteractiveComponentSize()
-            .size(ShapedIconButtonDefaults.Size)
+            .size(size)
             .clip(shape)
             .background(color = colors.containerColor(enabled, checked).value)
             .toggleable(
@@ -87,9 +87,7 @@ fun ShapedIconToggleButton(
                 enabled = enabled,
                 role = Role.Checkbox,
                 interactionSource = interactionSource,
-                indication = rememberRipple(
-                    bounded = true
-                )
+                indication = LocalIndication.current
             ),
         contentAlignment = Alignment.Center
     ) {

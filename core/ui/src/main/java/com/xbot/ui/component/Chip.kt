@@ -9,6 +9,10 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkOut
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,10 +36,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
@@ -43,12 +50,13 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-@OptIn(ExperimentalAnimationApi::class)
+@OptIn(ExperimentalAnimationApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun SelectableChip(
     modifier: Modifier = Modifier,
     selected: Boolean = false,
     onClick: () -> Unit = {},
+    onLongClick: () -> Unit = {},
     label: @Composable () -> Unit,
     labelTextStyle: TextStyle = MaterialTheme.typography.titleLarge,
     enabled: Boolean = true,
@@ -63,14 +71,19 @@ fun SelectableChip(
     val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
 
     Surface(
-        enabled = enabled,
-        selected = selected,
-        modifier = modifier.semantics { role = Role.Button },
-        onClick = onClick,
+        modifier = modifier
+            .semantics { role = Role.Button }
+            .clip(shape)
+            .combinedClickable(
+                enabled = enabled,
+                onClick = onClick,
+                onLongClick = onLongClick,
+                interactionSource = interactionSource,
+                indication = LocalIndication.current
+            ),
         shape = shape,
         color = colors.containerColor(enabled = enabled, selected = selected).value,
-        border = border.borderStroke(enabled = enabled, selected = selected).value,
-        interactionSource = interactionSource
+        border = border.borderStroke(enabled = enabled, selected = selected).value
     ) {
         ChipContent(
             label = label,
@@ -83,8 +96,8 @@ fun SelectableChip(
                         enter = enterTransition(),
                         exit = exitTransition()
                     ) {
-                        val scope = remember(transition.isRunning, selected) {
-                            SelectableChipScopeImpl(transition.isRunning && selected)
+                        val scope = remember(!transition.isRunning, selected) {
+                            SelectableChipScopeImpl(!transition.isRunning && selected)
                         }
                         scope.leadingIcon()
                     }
@@ -154,7 +167,8 @@ fun SelectableChipScope.SelectableChipBadge(
     shape: Shape = MaterialTheme.shapes.extraSmall,
     color: Color = MaterialTheme.colorScheme.primary
 ) {
-    val currentText by remember(shouldUpdateLabel) { mutableStateOf(text) }
+    var currentText by remember { mutableStateOf(text) }
+    if (shouldUpdateLabel) currentText = text
 
     Surface(
         modifier = modifier
