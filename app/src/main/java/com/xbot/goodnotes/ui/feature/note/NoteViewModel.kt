@@ -6,6 +6,7 @@ import com.xbot.common.Constants
 import com.xbot.domain.model.FolderModel
 import com.xbot.domain.model.NoteModel
 import com.xbot.domain.usecase.folder.AddFolder
+import com.xbot.domain.usecase.folder.DeleteFolder
 import com.xbot.domain.usecase.folder.GetFolders
 import com.xbot.domain.usecase.note.DeleteNotes
 import com.xbot.domain.usecase.note.GetNotes
@@ -40,6 +41,7 @@ class NoteViewModel @Inject constructor(
     private val addFolder: AddFolder,
     private val updateNote: UpdateNote,
     private val deleteNotes: DeleteNotes,
+    private val deleteFolder: DeleteFolder,
     private val restoreNotes: RestoreNotes,
     private val snackbarManager: SnackbarManager
 ) : ViewModel() {
@@ -103,6 +105,17 @@ class NoteViewModel @Inject constructor(
                             }
                         )
                     )
+                }
+            }
+
+            is NoteScreenAction.DeleteFolder -> {
+                val newFolderId = when (action.folder.id) {
+                    currentFolderId.value -> Constants.DEFAULT_FOLDER_ID
+                    else -> currentFolderId.value
+                }
+                viewModelScope.launch(Dispatchers.IO) {
+                    deleteFolder(action.folder.mapToDomainModel())
+                    currentFolderId.update { newFolderId }
                 }
             }
         }

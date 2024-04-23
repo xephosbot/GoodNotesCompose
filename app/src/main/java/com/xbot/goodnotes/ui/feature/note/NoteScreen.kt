@@ -4,6 +4,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -13,15 +14,23 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -45,6 +54,7 @@ import com.xbot.ui.component.Scaffold
 import com.xbot.ui.component.SelectableChip
 import com.xbot.ui.component.SelectableChipBadge
 import com.xbot.ui.component.SelectableItemsState
+import com.xbot.ui.component.ShapedIconButton
 import com.xbot.ui.component.ShapedIconToggleButton
 import com.xbot.ui.component.isScrollingUp
 import com.xbot.ui.component.rememberSelectableItemsState
@@ -81,6 +91,7 @@ private fun NoteScreenContent(
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val selectionState = rememberSelectableItemsState<Note>()
     val lazyGridState = rememberLazyStaggeredGridState()
+    var openAddNewFolderDialog by remember { mutableStateOf(false) }
 
     BackHandler(enabled = selectionState.inSelectionMode) {
         selectionState.clear()
@@ -112,6 +123,12 @@ private fun NoteScreenContent(
                     isFolderSelected = { it == state.currentFolderId },
                     onFolderClick = { folderId ->
                         onAction(NoteScreenAction.OpenFolder(folderId))
+                    },
+                    onAddNewFolderClick = {
+                        openAddNewFolderDialog = true
+                    },
+                    onDeleteFolderClick = { folder ->
+                        onAction(NoteScreenAction.DeleteFolder(folder))
                     }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -140,6 +157,18 @@ private fun NoteScreenContent(
             },
             onFavoriteClick = { note ->
                 onAction(NoteScreenAction.UpdateNote(note, !note.isFavorite))
+            }
+        )
+    }
+
+    if (openAddNewFolderDialog) {
+        AddNewFolderDialog(
+            onDismissRequest = {
+                openAddNewFolderDialog = false
+            },
+            onConfirmation = { folderName ->
+                onAction(NoteScreenAction.AddFolder(folderName))
+                openAddNewFolderDialog = false
             }
         )
     }
@@ -214,8 +243,12 @@ private fun FolderLazyRow(
     items: List<Folder>,
     noteCount: Int,
     isFolderSelected: (Long) -> Boolean,
-    onFolderClick: (Long) -> Unit
+    onFolderClick: (Long) -> Unit,
+    onAddNewFolderClick: () -> Unit,
+    onDeleteFolderClick: (Folder) -> Unit
 ) {
+    var currentFolderContextMenu by remember { mutableStateOf<Long?>(null) }
+
     LazyRow(
         modifier = modifier,
         contentPadding = PaddingValues(horizontal = 12.dp),
@@ -243,14 +276,88 @@ private fun FolderLazyRow(
             items = items,
             key = { it.id }
         ) { folder ->
-            SelectableChip(
-                selected = isFolderSelected(folder.id),
-                onClick = { onFolderClick(folder.id) },
-                label = { Text(text = folder.name) },
-                leadingIcon = { SelectableChipBadge(text = noteCount.toString()) }
-            )
+            Box {
+                SelectableChip(
+                    selected = isFolderSelected(folder.id),
+                    onClick = { onFolderClick(folder.id) },
+                    onLongClick = { currentFolderContextMenu = folder.id },
+                    label = { Text(text = folder.name) },
+                    leadingIcon = { SelectableChipBadge(text = noteCount.toString()) }
+                )
+
+                DropdownMenu(
+                    expanded = currentFolderContextMenu == folder.id,
+                    onDismissRequest = { currentFolderContextMenu = null },
+                    shape = MaterialTheme.shapes.medium
+                ) {
+                    DropdownMenuItem(
+                        text = {
+                            Text(text = stringResource(R.string.context_menu_delete))
+                        },
+                        onClick = {
+                            onDeleteFolderClick(folder)
+                            currentFolderContextMenu = null
+                        }
+                    )
+                }
+            }
+        }
+
+        item {
+            ShapedIconButton(
+                onClick = onAddNewFolderClick,
+                size = 40.dp
+            ) {
+                Icon(
+                    imageVector = Icons.Add,
+                    contentDescription = ""
+                )
+            }
         }
     }
+}
+
+@Composable
+private fun AddNewFolderDialog(
+    onDismissRequest: () -> Unit,
+    onConfirmation: (String) -> Unit
+) {
+    var text by remember { mutableStateOf("") }
+
+    AlertDialog(
+        title = {
+            Text(text = stringResource(R.string.dialog_add_new_folder_title))
+        },
+        text = {
+            OutlinedTextField(
+                value = text,
+                onValueChange = { text = it },
+                label = {
+                    Text(text = stringResource(R.string.dialog_add_new_folder_textfield_hint))
+                },
+                shape = MaterialTheme.shapes.medium
+            )
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onConfirmation(text)
+                }
+            ) {
+                Text(text = stringResource(R.string.dialog_add_new_folder_button_confirm))
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = {
+                    onDismissRequest()
+                }
+            ) {
+                Text(text = stringResource(R.string.dialog_add_new_folder_button_dismiss))
+            }
+        },
+        onDismissRequest = onDismissRequest
+    )
 }
 
 @OptIn(ExperimentalFoundationApi::class)

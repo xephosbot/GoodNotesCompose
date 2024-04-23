@@ -19,6 +19,9 @@ internal fun FolderModel.mapToUIModel() =
 internal fun Note.mapToDomainModel() =
     NoteModel(id, title, content, isFavorite, timeStamp, colorId)
 
+internal fun Folder.mapToDomainModel() =
+    FolderModel(id, name)
+
 internal fun Long.convertToDateTime(): String {
     val instant = Instant.fromEpochSeconds(this)
     val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
