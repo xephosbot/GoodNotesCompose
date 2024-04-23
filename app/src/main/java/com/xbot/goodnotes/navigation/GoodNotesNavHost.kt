@@ -57,7 +57,7 @@ fun GoodNotesNavHost(
                 )
             ) {
                 NoteDetailScreen(
-                    navigateBack = {
+                    onNavigateBack = {
                         navController.popBackStack()
                     }
                 )

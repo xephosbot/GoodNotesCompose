@@ -11,4 +11,9 @@
         <item quantity="few">%d заметки были удалены</item>
         <item quantity="many">%d заметок были удалены</item>
     </plurals>
+    <string name="dialog_add_new_folder_title">Новая папка</string>
+    <string name="dialog_add_new_folder_textfield_hint">Название папки</string>
+    <string name="dialog_add_new_folder_button_confirm">Сохранить</string>
+    <string name="dialog_add_new_folder_button_dismiss">Отмена</string>
+    <string name="context_menu_delete">Удалить</string>
 </resources>

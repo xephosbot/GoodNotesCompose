@@ -9,4 +9,9 @@
         <item quantity="one">%d note was deleted</item>
         <item quantity="other">%d notes were deleted</item>
     </plurals>
+    <string name="dialog_add_new_folder_title">Add new folder</string>
+    <string name="dialog_add_new_folder_textfield_hint">Folder name</string>
+    <string name="dialog_add_new_folder_button_confirm">Save</string>
+    <string name="dialog_add_new_folder_button_dismiss">Cancel</string>
+    <string name="context_menu_delete">Delete</string>
 </resources>
