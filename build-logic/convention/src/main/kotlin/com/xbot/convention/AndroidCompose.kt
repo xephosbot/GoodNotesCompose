@@ -22,9 +22,12 @@ internal fun Project.configureAndroidCompose(
         }
 
         dependencies {
-            val bom = libs.findLibrary("androidx-compose-bom").get()
+            /*val bom = libs.findLibrary("androidx-compose-bom").get()
             add("implementation", platform(bom))
-            add("androidTestImplementation", platform(bom))
+            add("androidTestImplementation", platform(bom))*/
+
+            val bomAlpha = libs.findLibrary("androidx-compose-bom-alpha").get()
+            add("api", platform(bomAlpha))
 
             val immutableCollections = libs.findLibrary("kotlinx-collections-immutable").get()
             add("implementation", immutableCollections)
