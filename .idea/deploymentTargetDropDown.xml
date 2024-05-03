@@ -2,19 +2,13 @@
 <project version="4">
   <component name="deploymentTargetDropDown">
     <value>
-      <entry key="AnimatedLazyColumnDemo">
+      <entry key="Generate Baseline Profile for app">
         <State />
       </entry>
-      <entry key="LazyColumnDragAndDropDemo">
+      <entry key="SimpleEntityReadWriteTest">
         <State />
       </entry>
-      <entry key="SizeTransformNav">
-        <State />
-      </entry>
-      <entry key="TestPreview">
-        <State />
-      </entry>
-      <entry key="UserCardsRoot">
+      <entry key="StartupBenchmarks">
         <State />
       </entry>
       <entry key="app">

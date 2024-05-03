@@ -161,7 +161,7 @@ object NoteCardDefaults {
     @Composable
     fun noteCardColors(
         containerColor: Color = MaterialTheme.colorScheme.secondaryContainer,
-        contentColor: Color = MaterialTheme.colorScheme.onSecondaryContainer
+        contentColor: Color = MaterialTheme.colorScheme.onSurface
     ): NoteCardColors = NoteCardColors(
         containerColor = containerColor,
         contentColor = contentColor

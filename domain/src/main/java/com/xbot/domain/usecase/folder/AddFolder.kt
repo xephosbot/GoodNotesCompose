@@ -8,6 +8,8 @@ class AddFolder @Inject constructor(
     private val repository: FolderRepository
 ) {
     suspend operator fun invoke(folder: FolderModel) {
-        repository.insertFolder(folder)
+        if (folder.name.isNotBlank()) {
+            repository.insertFolder(folder)
+        }
     }
 }

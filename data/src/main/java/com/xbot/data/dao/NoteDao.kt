@@ -7,6 +7,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
+import androidx.room.Upsert
 import com.xbot.data.model.note.NoteEntity
 import com.xbot.data.model.note.NoteUpdate
 import com.xbot.data.model.note.NoteWithFolders
@@ -14,7 +15,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface NoteDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Upsert
     suspend fun insert(note: NoteEntity): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -34,7 +35,7 @@ interface NoteDao {
 
     @Transaction
     @Query("SELECT * FROM notes WHERE noteId = :noteId")
-    fun getNoteWithFolders(noteId: Int): Flow<NoteWithFolders>
+    suspend fun getNoteWithFolders(noteId: Long): NoteWithFolders
 
     @Update(entity = NoteEntity::class)
     suspend fun update(noteUpdate: NoteUpdate)

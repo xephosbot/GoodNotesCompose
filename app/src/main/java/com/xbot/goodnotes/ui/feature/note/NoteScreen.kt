@@ -3,25 +3,37 @@ package com.xbot.goodnotes.ui.feature.note
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
@@ -31,10 +43,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -46,6 +59,7 @@ import com.xbot.goodnotes.model.Folder
 import com.xbot.goodnotes.model.Note
 import com.xbot.goodnotes.ui.plus
 import com.xbot.ui.component.AnimatedFloatingActionButton
+import com.xbot.ui.component.FilledShapedIconButton
 import com.xbot.ui.component.LargeTopAppBarWithSelectionMode
 import com.xbot.ui.component.LazyVerticalStaggeredGridWithSelection
 import com.xbot.ui.component.NoteCard
@@ -54,13 +68,12 @@ import com.xbot.ui.component.Scaffold
 import com.xbot.ui.component.SelectableChip
 import com.xbot.ui.component.SelectableChipBadge
 import com.xbot.ui.component.SelectableItemsState
-import com.xbot.ui.component.ShapedIconButton
 import com.xbot.ui.component.ShapedIconToggleButton
 import com.xbot.ui.component.isScrollingUp
 import com.xbot.ui.component.rememberSelectableItemsState
 import com.xbot.ui.icon.Icons
-import com.xbot.ui.theme.NoteColors
 import com.xbot.ui.theme.harmonized
+import com.xbot.ui.theme.noteColors
 import kotlinx.collections.immutable.ImmutableList
 
 @Composable
@@ -91,7 +104,8 @@ private fun NoteScreenContent(
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val selectionState = rememberSelectableItemsState<Note>()
     val lazyGridState = rememberLazyStaggeredGridState()
-    var openAddNewFolderDialog by remember { mutableStateOf(false) }
+    var showAddNewFolderDialog by remember { mutableStateOf(false) }
+    var showChangeFolderBottomSheet by remember { mutableStateOf(false) }
 
     BackHandler(enabled = selectionState.inSelectionMode) {
         selectionState.clear()
@@ -109,8 +123,9 @@ private fun NoteScreenContent(
                     onAction(NoteScreenAction.DeleteNotes(selectionState.selectedItems))
                     selectionState.clear()
                 },
-                onMoreClick = {
-                    //TODO: drop down menu with multiple functions
+                onChangeFolderClick = {
+                    onAction(NoteScreenAction.UpdateRelatedFolders(selectionState.selectedItems))
+                    showChangeFolderBottomSheet = true
                 },
                 onClearClick = {
                     selectionState.clear()
@@ -125,13 +140,13 @@ private fun NoteScreenContent(
                         onAction(NoteScreenAction.OpenFolder(folderId))
                     },
                     onAddNewFolderClick = {
-                        openAddNewFolderDialog = true
+                        showAddNewFolderDialog = true
                     },
                     onDeleteFolderClick = { folder ->
                         onAction(NoteScreenAction.DeleteFolder(folder))
                     }
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(12.dp))
             }
         },
         floatingActionButton = {
@@ -159,16 +174,34 @@ private fun NoteScreenContent(
                 onAction(NoteScreenAction.UpdateNote(note, !note.isFavorite))
             }
         )
+        if (state.notesList.isEmpty()) {
+            EmptyScreenPlaceHolder()
+        }
     }
 
-    if (openAddNewFolderDialog) {
+    if (showAddNewFolderDialog) {
         AddNewFolderDialog(
             onDismissRequest = {
-                openAddNewFolderDialog = false
+                showAddNewFolderDialog = false
             },
             onConfirmation = { folderName ->
                 onAction(NoteScreenAction.AddFolder(folderName))
-                openAddNewFolderDialog = false
+                showAddNewFolderDialog = false
+            }
+        )
+    }
+
+    if (showChangeFolderBottomSheet) {
+        ChangeFolderBottomSheet(
+            items = state.foldersList,
+            isFolderChecked = { folder ->
+                state.relatedFolders.contains(folder)
+            },
+            onFolderCheckedChange = { folder, checked ->
+                onAction(NoteScreenAction.ChangeFolderForNotes(selectionState.selectedItems, folder, checked))
+            },
+            onDismissRequest = {
+                showChangeFolderBottomSheet = false
             }
         )
     }
@@ -181,11 +214,13 @@ fun NoteScreenTopAppBar(
     selectionState: SelectableItemsState<Note>,
     onSettingsClick: () -> Unit,
     onDeleteClick: () -> Unit,
-    onMoreClick: () -> Unit,
+    onChangeFolderClick: () -> Unit,
     onClearClick: () -> Unit,
     scrollBehavior: TopAppBarScrollBehavior,
     content: @Composable ColumnScope.() -> Unit
 ) {
+    var showDropDownMenu by remember { mutableStateOf(false) }
+
     LargeTopAppBarWithSelectionMode(
         modifier = modifier,
         selected = selectionState.inSelectionMode,
@@ -214,11 +249,29 @@ fun NoteScreenTopAppBar(
                             contentDescription = ""
                         )
                     }
-                    IconButton(onClick = onMoreClick) {
-                        Icon(
-                            imageVector = Icons.MoreVert,
-                            contentDescription = ""
-                        )
+                    Box {
+                        IconButton(onClick = { showDropDownMenu = true }) {
+                            Icon(
+                                imageVector = Icons.MoreVert,
+                                contentDescription = ""
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = showDropDownMenu,
+                            onDismissRequest = {
+                                showDropDownMenu = false
+                            }
+                        ) {
+                            DropdownMenuItem(
+                                text = {
+                                    Text(text = stringResource(R.string.context_menu_add_note_to_folder))
+                                },
+                                onClick = {
+                                    onChangeFolderClick()
+                                    showDropDownMenu = false
+                                }
+                            )
+                        }
                     }
                 }
 
@@ -287,8 +340,7 @@ private fun FolderLazyRow(
 
                 DropdownMenu(
                     expanded = currentFolderContextMenu == folder.id,
-                    onDismissRequest = { currentFolderContextMenu = null },
-                    shape = MaterialTheme.shapes.medium
+                    onDismissRequest = { currentFolderContextMenu = null }
                 ) {
                     DropdownMenuItem(
                         text = {
@@ -304,7 +356,7 @@ private fun FolderLazyRow(
         }
 
         item {
-            ShapedIconButton(
+            FilledShapedIconButton(
                 onClick = onAddNewFolderClick,
                 size = 40.dp
             ) {
@@ -358,6 +410,73 @@ private fun AddNewFolderDialog(
         },
         onDismissRequest = onDismissRequest
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ChangeFolderBottomSheet(
+    items: List<Folder>,
+    isFolderChecked: (Folder) -> Boolean,
+    onFolderCheckedChange: (Folder, Boolean) -> Unit,
+    onDismissRequest: () -> Unit
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismissRequest,
+        windowInsets = WindowInsets(0),
+    ) {
+        LazyColumn(
+            contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Bottom).asPaddingValues()
+        ) {
+            items(
+                items = items,
+                key = { it.id }
+            ) { folder ->
+                ChangeFolderItem(
+                    folder = folder,
+                    checked = isFolderChecked(folder),
+                    onCheckedChange = { checked ->
+                        onFolderCheckedChange(folder, checked)
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ChangeFolderItem(
+    modifier: Modifier = Modifier,
+    folder: Folder,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }
+) {
+    Surface(
+        onClick = {
+            onCheckedChange(!checked)
+        },
+        interactionSource = interactionSource
+    ) {
+        ListItem(
+            modifier = modifier.height(48.dp),
+            leadingContent = {
+                Checkbox(
+                    checked = checked,
+                    onCheckedChange = {
+                        onCheckedChange(!checked)
+                    },
+                    interactionSource = interactionSource
+                )
+            },
+            headlineContent = {
+                Text(
+                    text = folder.name,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        )
+    }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -418,8 +537,7 @@ private fun NoteCard(
         modifier = modifier,
         selected = selected,
         colors = NoteCardDefaults.noteCardColors(
-            containerColor = NoteColors[note.colorId].harmonized,
-            contentColor = Color.Black
+            containerColor = MaterialTheme.noteColors[note.colorId].harmonized
         ),
         headlineContent = {
             Text(
@@ -465,4 +583,17 @@ private fun NoteCard(
         onClick = { onClick() },
         onLongClick = { onLongClick() }
     )
+}
+
+@Composable
+private fun EmptyScreenPlaceHolder() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = stringResource(R.string.empty_screen_placeholder_text),
+            textAlign = TextAlign.Center
+        )
+    }
 }

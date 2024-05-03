@@ -1,5 +1,6 @@
 package com.xbot.ui.theme
 
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
 
 val White = Color(0xFFFFFFFF)
@@ -49,11 +50,3 @@ val LightPurple50 = Color(0xFFF1F0F4)
 val LightPurple100 = Color(0xFFFCFCFF)
 
 val DarkPurple10 = Color(0xFF2F3033)
-
-val NoteColors = listOf(
-    Color(0xFFF7D44C),
-    Color(0xFFEB7A53),
-    Color(0xFF98B7DB),
-    Color(0xFFA8D672),
-    Color(0xFFF6ECC9)
-)

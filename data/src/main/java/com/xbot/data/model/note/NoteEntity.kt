@@ -2,7 +2,6 @@ package com.xbot.data.model.note
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import kotlinx.datetime.Clock
 
 @Entity(tableName = "notes")
 data class NoteEntity(
@@ -10,6 +9,6 @@ data class NoteEntity(
     val title: String,
     val content: String,
     val isFavorite: Boolean = false,
-    val timeStamp: Long = Clock.System.now().toEpochMilliseconds(),
+    val timeStamp: Long,
     val colorId: Int
 )

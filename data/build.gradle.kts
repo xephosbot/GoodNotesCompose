@@ -6,6 +6,10 @@ plugins {
 android {
     namespace = "com.xbot.data"
 
+    defaultConfig {
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
     buildFeatures {
         buildConfig = true
     }
@@ -23,6 +27,7 @@ dependencies {
     implementation(libs.kotlinx.datetime)
 
     // Testing dependencies
+    androidTestImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.test.espresso.core)
     androidTestImplementation(libs.androidx.test.ext)
 }

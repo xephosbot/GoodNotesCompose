@@ -1,5 +1,6 @@
 package com.xbot.ui.component
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.AnimationState
 import androidx.compose.animation.core.DecayAnimationSpec
@@ -214,6 +215,7 @@ private fun LargeTopAppBarContent(
     }
 }
 
+@SuppressLint("RestrictedApi")
 @Composable
 private fun LargeTopAppBarLayout(
     modifier: Modifier,

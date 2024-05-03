@@ -8,6 +8,8 @@ import com.xbot.domain.model.NoteModel
 import com.xbot.domain.usecase.folder.AddFolder
 import com.xbot.domain.usecase.folder.DeleteFolder
 import com.xbot.domain.usecase.folder.GetFolders
+import com.xbot.domain.usecase.folder.GetFoldersRelatedToNote
+import com.xbot.domain.usecase.note.AddNotes
 import com.xbot.domain.usecase.note.DeleteNotes
 import com.xbot.domain.usecase.note.GetNotes
 import com.xbot.domain.usecase.note.RestoreNotes
@@ -15,6 +17,7 @@ import com.xbot.domain.usecase.note.UpdateNote
 import com.xbot.goodnotes.R
 import com.xbot.goodnotes.mapToDomainModel
 import com.xbot.goodnotes.mapToUIModel
+import com.xbot.goodnotes.model.Folder
 import com.xbot.goodnotes.model.Note
 import com.xbot.ui.component.Message
 import com.xbot.ui.component.MessageAction
@@ -38,6 +41,8 @@ import javax.inject.Inject
 class NoteViewModel @Inject constructor(
     private val getNotes: GetNotes,
     private val getFolders: GetFolders,
+    private val getFoldersRelatedToNote: GetFoldersRelatedToNote,
+    private val addNotes: AddNotes,
     private val addFolder: AddFolder,
     private val updateNote: UpdateNote,
     private val deleteNotes: DeleteNotes,
@@ -47,14 +52,16 @@ class NoteViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val currentFolderId = MutableStateFlow(Constants.DEFAULT_FOLDER_ID)
+    private val relatedFolders = MutableStateFlow(listOf<Folder>())
     private val notes = currentFolderId.flatMapLatest { getNotes(it) }
 
     val state: StateFlow<NoteScreenState> = combine(
-        notes, getFolders()
-    ) { notesList, foldersList ->
+        notes, getFolders(), relatedFolders
+    ) { notesList, foldersList, relatedFolders ->
         NoteScreenState(
             notesList = notesList.map(NoteModel::mapToUIModel).toImmutableList(),
             foldersList = foldersList.map(FolderModel::mapToUIModel).toImmutableList(),
+            relatedFolders = relatedFolders.toImmutableList(),
             noteCount = notesList.count(),
             currentFolderId = currentFolderId.value
         )
@@ -116,6 +123,37 @@ class NoteViewModel @Inject constructor(
                 viewModelScope.launch(Dispatchers.IO) {
                     deleteFolder(action.folder.mapToDomainModel())
                     currentFolderId.update { newFolderId }
+                }
+            }
+
+            is NoteScreenAction.UpdateRelatedFolders -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    val folders = action.notes.flatMap { note ->
+                        getFoldersRelatedToNote(note.id)
+                    }.toSet()
+                    relatedFolders.update { folders.map(FolderModel::mapToUIModel) }
+                }
+            }
+
+            is NoteScreenAction.ChangeFolderForNotes -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    when (action.value) {
+                        true -> {
+                            addNotes(
+                                notes = action.notes.map(Note::mapToDomainModel),
+                                folderId = action.folder.id
+                            )
+                            relatedFolders.update { it + action.folder }
+                        }
+                        else -> {
+                            deleteNotes(
+                                notes = action.notes.map(Note::mapToDomainModel),
+                                folderId = action.folder.id,
+                                actionId = UUID.randomUUID().mostSignificantBits
+                            )
+                            relatedFolders.update { it - action.folder }
+                        }
+                    }
                 }
             }
         }

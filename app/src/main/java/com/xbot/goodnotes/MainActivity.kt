@@ -17,11 +17,11 @@ import androidx.core.splashscreen.SplashScreenViewProvider
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.xbot.goodnotes.ui.FastOutLinearInInterpolator
 import com.xbot.goodnotes.ui.GoodNotesApp
 import com.xbot.goodnotes.ui.enableEdgeToEdge
 import com.xbot.goodnotes.ui.shouldUseDarkTheme
 import com.xbot.goodnotes.ui.shouldUseDynamicTheming
+import com.xbot.ui.animation.FastOutLinearInInterpolator
 import com.xbot.ui.theme.GoodNotesTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect

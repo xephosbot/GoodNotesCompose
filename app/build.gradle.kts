@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.xbot.android.application)
     alias(libs.plugins.xbot.android.application.compose)
     alias(libs.plugins.xbot.android.hilt)
+    alias(libs.plugins.baselineprofile)
 }
 
 android {
@@ -51,6 +52,10 @@ android {
             excludes.add("/META-INF/{AL2.0,LGPL2.1}")
         }
     }
+
+    baselineProfile {
+        automaticGenerationDuringBuild = true
+    }
 }
 
 dependencies {
@@ -59,6 +64,7 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":domain"))
     implementation(project(":data"))
+    baselineProfile(project(":baselineprofile"))
 
     // Kotlin dependencies
     implementation(libs.kotlinx.datetime)
@@ -71,6 +77,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewModelCompose)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.androidx.profileinstaller)
 
     // Accompanist dependencies
     implementation(libs.accompanist.navigation)

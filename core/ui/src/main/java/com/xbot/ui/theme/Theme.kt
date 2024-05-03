@@ -10,6 +10,7 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -97,6 +98,10 @@ fun GoodNotesTheme(
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
+    val noteColors = when {
+        darkTheme -> NoteColors(DarkNoteColors)
+        else -> NoteColors(LightNoteColors)
+    }
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
@@ -108,12 +113,14 @@ fun GoodNotesTheme(
         }
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        shapes = Shapes,
-        typography = Typography,
-        content = content
-    )
+    CompositionLocalProvider(LocalNoteColors provides noteColors) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            shapes = Shapes,
+            typography = Typography,
+            content = content
+        )
+    }
 }
 
 @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.S)

@@ -13,8 +13,8 @@ import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text2.BasicTextField2
+import androidx.compose.foundation.text2.input.TextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.BottomAppBarDefaults
@@ -23,12 +23,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -36,26 +39,25 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.xbot.goodnotes.ui.changeStatusBarAppearance
 import com.xbot.goodnotes.ui.plus
 import com.xbot.ui.component.Scaffold
 import com.xbot.ui.component.ShapedIconButtonDefaults
 import com.xbot.ui.component.ShapedIconToggleButton
 import com.xbot.ui.icon.Icons
-import com.xbot.ui.theme.NoteColors
 import com.xbot.ui.theme.harmonized
+import com.xbot.ui.theme.noteColors
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun NoteDetailScreen(
     viewModel: NoteDetailViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-
-    changeStatusBarAppearance(isLightAppearance = false)
-
     NoteDetailScreenContent(
         state = state,
+        titleTextFieldState = viewModel.titleTextFieldState,
+        contentTextFieldState = viewModel.contentTextFieldState,
         onAction = viewModel::onAction,
         onNavigateBack = onNavigateBack
     )
@@ -66,22 +68,19 @@ fun NoteDetailScreen(
 fun NoteDetailScreenContent(
     modifier: Modifier = Modifier,
     state: NoteDetailScreenState,
+    titleTextFieldState: TextFieldState,
+    contentTextFieldState: TextFieldState,
     onAction: (NoteDetailScreenAction) -> Unit,
     onNavigateBack: () -> Unit
 ) {
-    val titleTextFieldState = rememberSaveable(state.noteTitle, saver = TextFieldState.Saver) {
-        TextFieldState(state.noteTitle)
-    }
-    val contentTextFieldState = rememberSaveable(state.noteText, saver = TextFieldState.Saver) {
-        TextFieldState(state.noteText)
-    }
+    var showColorPickerBottomSheet by remember { mutableStateOf(false) }
 
     Scaffold(
         modifier = modifier,
         topBar = {
             NoteDetailScreenAppBar(
                 isFavorite = state.noteIsFavorite,
-                containerColor = NoteColors[state.noteColorId].harmonized,
+                containerColor = Color.Transparent,
                 onArrowBackClick = {
                     onAction(NoteDetailScreenAction.Save)
                     onNavigateBack()
@@ -93,10 +92,12 @@ fun NoteDetailScreenContent(
         },
         bottomBar = {
             NoteDetailScreenBottomAppBar(
-                containerColor = NoteColors[state.noteColorId].harmonized,
+                containerColor = MaterialTheme.noteColors[state.noteColorId].harmonized,
                 canUndo = contentTextFieldState.undoState.canUndo,
                 canRedo = contentTextFieldState.undoState.canRedo,
-                onPaletteClick = {},
+                onPaletteClick = {
+                    showColorPickerBottomSheet = true
+                },
                 onUndoClick = {
                     contentTextFieldState.undoState.undo()
                 },
@@ -105,8 +106,8 @@ fun NoteDetailScreenContent(
                 }
             )
         },
-        containerColor = NoteColors[state.noteColorId].harmonized,
-        contentColor = Color.Black
+        containerColor = MaterialTheme.noteColors[state.noteColorId].harmonized,
+        contentColor = MaterialTheme.colorScheme.onSurface
     ) { contentPadding ->
         Column(
             modifier = Modifier
@@ -124,6 +125,22 @@ fun NoteDetailScreenContent(
                 textStyle = MaterialTheme.typography.bodyLarge
             )
         }
+    }
+
+    if (showColorPickerBottomSheet) {
+        ColorPickerBottomSheet(
+            colorsList = MaterialTheme.noteColors.value,
+            containerColor = MaterialTheme.noteColors[state.noteColorId].harmonized,
+            isColorSelected = { colorId ->
+                state.noteColorId == colorId
+            },
+            onClickColor = { colorId ->
+                onAction(NoteDetailScreenAction.ChangeNoteColor(colorId))
+            },
+            onDismissRequest = {
+                showColorPickerBottomSheet = false
+            }
+        )
     }
 }
 
@@ -209,6 +226,7 @@ private fun NoteDetailScreenBottomAppBar(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun TextField(
     modifier: Modifier = Modifier,
@@ -216,10 +234,10 @@ private fun TextField(
     hint: String,
     textStyle: TextStyle
 ) {
-    BasicTextField(
+    BasicTextField2(
         modifier = modifier,
         state = state,
-        textStyle = textStyle,
+        textStyle = textStyle.copy(color = LocalContentColor.current),
         decorator = { innerTextField ->
             if (state.text.isEmpty()) {
                 Text(
@@ -233,33 +251,42 @@ private fun TextField(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ColorsBottomAppBar(
+private fun ColorPickerBottomSheet(
     modifier: Modifier = Modifier,
     colorsList: List<Color>,
     containerColor: Color,
-    contentColor: Color = Color.Black,
+    contentColor: Color = LocalContentColor.current,
     isColorSelected: (Int) -> Boolean,
-    onClickColor: (Int) -> Unit
+    onClickColor: (Int) -> Unit,
+    onDismissRequest: () -> Unit
 ) {
-    BottomAppBar(
-        modifier = modifier,
+    ModalBottomSheet(
+        onDismissRequest = onDismissRequest,
+        windowInsets = WindowInsets(0),
         containerColor = containerColor,
-        contentColor = contentColor,
+        contentColor = contentColor
     ) {
-        LazyRow(
-            contentPadding = PaddingValues(horizontal = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        BottomAppBar(
+            modifier = modifier,
+            containerColor = Color.Transparent,
+            contentColor = contentColor
         ) {
-            itemsIndexed(
-                items = colorsList,
-                key = { _, color -> color.toArgb() }
-            ) { index, color ->
-                ColorItem(
-                    color = color,
-                    selected = isColorSelected(index),
-                    onClick = { onClickColor(index) }
-                )
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                itemsIndexed(
+                    items = colorsList,
+                    key = { _, color -> color.toArgb() }
+                ) { index, color ->
+                    ColorItem(
+                        color = color,
+                        selected = isColorSelected(index),
+                        onClick = { onClickColor(index) }
+                    )
+                }
             }
         }
     }
@@ -275,7 +302,10 @@ private fun ColorItem(
     ShapedIconToggleButton(
         modifier = modifier
             .border(
-                border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary),
+                border = BorderStroke(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                ),
                 shape = MaterialTheme.shapes.extraSmall
             ),
         checked = selected,

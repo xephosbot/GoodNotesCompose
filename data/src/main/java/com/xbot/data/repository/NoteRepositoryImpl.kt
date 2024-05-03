@@ -6,8 +6,10 @@ import com.xbot.data.dao.NoteFolderCrossRefDao
 import com.xbot.data.mapToDataModel
 import com.xbot.data.mapToDomainModel
 import com.xbot.data.model.NoteFolderCrossRef
+import com.xbot.data.model.folder.FolderEntity
 import com.xbot.data.model.note.NoteEntity
 import com.xbot.data.model.note.NoteUpdate
+import com.xbot.domain.model.FolderModel
 import com.xbot.domain.model.NoteModel
 import com.xbot.domain.repository.NoteRepository
 import kotlinx.coroutines.flow.Flow
@@ -28,8 +30,18 @@ class NoteRepositoryImpl @Inject constructor(
         return noteDao.getNote(noteId)?.mapToDomainModel()
     }
 
+    override suspend fun getFoldersRelatedToNote(noteId: Long): List<FolderModel> {
+        return noteDao.getNoteWithFolders(noteId).folders.map(FolderEntity::mapToDomainModel)
+    }
+
     override suspend fun insertNote(note: NoteModel, folderId: Long) {
-        val noteId = noteDao.insert(note.mapToDataModel())
+        val noteId = when (note.id) {
+            0L -> noteDao.insert(note.mapToDataModel())
+            else -> {
+                noteDao.insert(note.mapToDataModel())
+                note.id
+            }
+        }
         if (folderId != Constants.DEFAULT_FOLDER_ID) {
             val crossRef = NoteFolderCrossRef(noteId, folderId)
             noteFolderCrossRefDao.insert(crossRef)

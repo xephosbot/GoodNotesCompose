@@ -1,5 +1,6 @@
 package com.xbot.goodnotes
 
+import com.xbot.domain.model.AppTheme
 import com.xbot.domain.model.FolderModel
 import com.xbot.domain.model.NoteModel
 import com.xbot.goodnotes.model.Folder
@@ -21,6 +22,19 @@ internal fun Note.mapToDomainModel() =
 
 internal fun Folder.mapToDomainModel() =
     FolderModel(id, name)
+
+internal fun AppTheme.toInt() = when (this) {
+    is AppTheme.System -> 0
+    is AppTheme.Light -> 1
+    is AppTheme.Dark -> 2
+}
+
+internal fun Int.toAppTheme() = when (this) {
+    0 -> AppTheme.System
+    1 -> AppTheme.Light
+    2 -> AppTheme.Dark
+    else -> AppTheme.System
+}
 
 internal fun Long.convertToDateTime(): String {
     val instant = Instant.fromEpochSeconds(this)

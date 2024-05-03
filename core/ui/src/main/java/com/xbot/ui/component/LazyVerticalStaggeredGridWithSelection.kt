@@ -1,6 +1,5 @@
 package com.xbot.ui.component
 
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -59,7 +58,7 @@ fun <T, K> LazyVerticalStaggeredGridWithSelection(
         horizontalArrangement = Arrangement.spacedBy(horizontalItemSpacing)
     ) {
         items(items, key) { item ->
-            Box(modifier = Modifier.animateItem()) {
+            Box(modifier = Modifier.animateItemPlacement()) {
                 with(selectionState) {
                     content(item, item.selected)
                 }

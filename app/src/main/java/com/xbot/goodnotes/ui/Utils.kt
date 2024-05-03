@@ -1,7 +1,5 @@
 package com.xbot.goodnotes.ui
 
-import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.res.Configuration
 import android.content.res.Resources
 import androidx.activity.ComponentActivity
@@ -12,10 +10,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.platform.LocalView
-import androidx.core.view.WindowCompat
 import com.xbot.domain.model.AppTheme
 import com.xbot.goodnotes.MainActivityUiState
 
@@ -30,29 +25,6 @@ operator fun PaddingValues.plus(other: PaddingValues): PaddingValues {
         end = this.calculateEndPadding(layoutDirection) + other.calculateEndPadding(layoutDirection),
         bottom = this.calculateBottomPadding() + other.calculateBottomPadding()
     )
-}
-
-@SuppressLint("ComposableNaming")
-@Composable
-fun changeStatusBarAppearance(isLightAppearance: Boolean) {
-    val view = LocalView.current
-    if (!view.isInEditMode) {
-        DisposableEffect(view) {
-            val window = (view.context as Activity).window
-            val insetsController = WindowCompat.getInsetsController(window, view)
-
-            val originalIsAppearanceLightStatusBars = insetsController.isAppearanceLightStatusBars
-            val originalIsAppearanceLightNavigationBars = insetsController.isAppearanceLightNavigationBars
-
-            insetsController.isAppearanceLightStatusBars = !isLightAppearance
-            insetsController.isAppearanceLightNavigationBars = !isLightAppearance
-
-            onDispose {
-                insetsController.isAppearanceLightStatusBars = originalIsAppearanceLightStatusBars
-                insetsController.isAppearanceLightNavigationBars = originalIsAppearanceLightNavigationBars
-            }
-        }
-    }
 }
 
 @Composable

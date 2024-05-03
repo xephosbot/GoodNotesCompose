@@ -1,6 +1,13 @@
 <resources>
     <string name="app_name" translatable="false">GoodNotes</string>
     <string name="my_notes_title">My\nNotes</string>
+    <string name="settings_title">Settings</string>
+    <string name="settings_option_dynamic_color">Use dynamic colors</string>
+    <string-array name="settings_options_app_theme">
+        <item>System</item>
+        <item>Light</item>
+        <item>Dark</item>
+    </string-array>
     <string name="folder_all_title">All</string>
     <string name="folder_favorite_title">Favorite</string>
     <string name="notes_count_title">Notes:\n%1$d</string>
@@ -14,4 +21,6 @@
     <string name="dialog_add_new_folder_button_confirm">Save</string>
     <string name="dialog_add_new_folder_button_dismiss">Cancel</string>
     <string name="context_menu_delete">Delete</string>
+    <string name="context_menu_add_note_to_folder">Add to folders</string>
+    <string name="empty_screen_placeholder_text">You don\'t have any notes,\nclick on + to create a new one.</string>
 </resources>

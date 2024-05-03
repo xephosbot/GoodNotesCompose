@@ -8,11 +8,10 @@ import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 
 @Composable
-fun <T> rememberSelectableItemsState(): SelectableItemsState<T> {
-    return rememberSaveable(saver = SelectableItemsState.Saver()) {
+fun <T> rememberSelectableItemsState(): SelectableItemsState<T> =
+    rememberSaveable(saver = SelectableItemsState.Saver()) {
         SelectableItemsState()
     }
-}
 
 class SelectableItemsState<T> private constructor(initialItems: List<T>) {
 

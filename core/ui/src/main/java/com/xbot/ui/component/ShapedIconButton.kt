@@ -61,6 +61,40 @@ fun ShapedIconButton(
 }
 
 @Composable
+fun FilledShapedIconButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    colors: ShapedIconButtonColors = ShapedIconButtonDefaults.filledShapedIconButtonColors(),
+    shape: Shape = ShapedIconButtonDefaults.shape,
+    size: Dp = ShapedIconButtonDefaults.Size,
+    interactionSource: MutableInteractionSource? = null,
+    content: @Composable () -> Unit
+) {
+    // TODO: Delete this after Compose 1.7.0
+    @Suppress("NAME_SHADOWING")
+    val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
+
+    Box(
+        modifier = modifier
+            .size(size)
+            .clip(shape)
+            .background(color = colors.containerColor(enabled).value)
+            .clickable(
+                onClick = onClick,
+                enabled = enabled,
+                role = Role.Button,
+                interactionSource = interactionSource,
+                indication = LocalIndication.current
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        val contentColor = colors.contentColor(enabled).value
+        CompositionLocalProvider(LocalContentColor provides contentColor, content = content)
+    }
+}
+
+@Composable
 fun ShapedIconToggleButton(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
@@ -110,13 +144,27 @@ object ShapedIconButtonDefaults {
         containerColor: Color = LocalContentColor.current.copy(alpha = ContainerDefaultOpacity),
         contentColor: Color = LocalContentColor.current,
         disabledContainerColor: Color = Color.Transparent,
-        disabledContentColor: Color = containerColor.copy(alpha = DisabledIconOpacity)
+        disabledContentColor: Color = contentColor.copy(alpha = DisabledIconOpacity)
     ): ShapedIconButtonColors = ShapedIconButtonColors(
         containerColor = containerColor,
         contentColor = contentColor,
         disabledContainerColor = disabledContainerColor,
         disabledContentColor = disabledContentColor
     )
+
+    @Composable
+    fun filledShapedIconButtonColors(
+        containerColor: Color = MaterialTheme.colorScheme.secondaryContainer,
+        contentColor: Color = MaterialTheme.colorScheme.onSecondaryContainer,
+        disabledContainerColor: Color = Color.Transparent,
+        disabledContentColor: Color = contentColor.copy(alpha = DisabledIconOpacity)
+    ): ShapedIconButtonColors = ShapedIconButtonColors(
+        containerColor = containerColor,
+        contentColor = contentColor,
+        disabledContainerColor = disabledContainerColor,
+        disabledContentColor = disabledContentColor
+    )
+
 
     @Composable
     fun shapedIconToggleButtonColors(

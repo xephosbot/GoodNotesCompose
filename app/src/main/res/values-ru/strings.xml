@@ -2,6 +2,13 @@
 <resources>
     <string name="app_name">GoodNotes</string>
     <string name="my_notes_title">Мои\nЗаметки</string>
+    <string name="settings_title">Настройки</string>
+    <string name="settings_option_dynamic_color">Использовать динамические цвета</string>
+    <string-array name="settings_options_app_theme">
+        <item>Система</item>
+        <item>Светлая</item>
+        <item>Темная</item>
+    </string-array>
     <string name="folder_all_title">Все</string>
     <string name="folder_favorite_title">Избранное</string>
     <string name="notes_count_title">Заметки:\n%1$d</string>
@@ -16,4 +23,6 @@
     <string name="dialog_add_new_folder_button_confirm">Сохранить</string>
     <string name="dialog_add_new_folder_button_dismiss">Отмена</string>
     <string name="context_menu_delete">Удалить</string>
+    <string name="context_menu_add_note_to_folder">Добавить в папки</string>
+    <string name="empty_screen_placeholder_text">У вас нет заметок,\nнажмите на + чтобы создать новую.</string>
 </resources>

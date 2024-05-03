@@ -12,16 +12,16 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
 import com.google.accompanist.navigation.material.rememberBottomSheetNavigator
-import com.xbot.goodnotes.ui.GoodNotesAppState
 import com.xbot.goodnotes.ui.feature.detail.NoteDetailScreen
 import com.xbot.goodnotes.ui.feature.note.NoteScreen
-import com.xbot.goodnotes.ui.feature.settings.SettingsScreenContent
+import com.xbot.goodnotes.ui.feature.settings.SettingsScreen
+import com.xbot.ui.animation.materialSharedAxisZIn
+import com.xbot.ui.animation.materialSharedAxisZOut
 
 @OptIn(ExperimentalMaterialNavigationApi::class)
 @Composable
 fun GoodNotesNavHost(
     modifier: Modifier = Modifier,
-    appState: GoodNotesAppState,
     containerColor: Color = MaterialTheme.colorScheme.surface,
     startDestination: String = "notesScreen"
 ) {
@@ -34,7 +34,19 @@ fun GoodNotesNavHost(
         NavHost(
             modifier = modifier.background(containerColor),
             navController = navController,
-            startDestination = startDestination
+            startDestination = startDestination,
+            enterTransition = {
+                materialSharedAxisZIn(forward = true)
+            },
+            exitTransition = {
+                materialSharedAxisZOut(forward = true)
+            },
+            popEnterTransition = {
+                materialSharedAxisZIn(forward = false)
+            },
+            popExitTransition = {
+                materialSharedAxisZOut(forward = false)
+            }
         ) {
             composable(
                 route = "notesScreen"
@@ -65,7 +77,7 @@ fun GoodNotesNavHost(
             bottomSheet(
                 route = "settingsScreen"
             ) {
-                SettingsScreenContent()
+                SettingsScreen()
             }
         }
     }

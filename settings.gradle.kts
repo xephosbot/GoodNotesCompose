@@ -17,7 +17,7 @@ dependencyResolutionManagement {
 rootProject.name = "GoodNotes Compose"
 include(":app")
 include(":core:ui")
-include(":core:shared-element")
+include(":core:common")
 include(":data")
 include(":domain")
-include(":core:common")
+include(":baselineprofile")

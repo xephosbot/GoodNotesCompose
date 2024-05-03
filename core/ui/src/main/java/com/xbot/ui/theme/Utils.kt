@@ -26,3 +26,7 @@ fun Color.harmonize(with: Color) = Color(MaterialColors.harmonize(this.toArgb(),
 val Color.harmonized
     @Composable
     get() = harmonize(MaterialTheme.colorScheme.primary)
+
+val MaterialTheme.noteColors: NoteColors
+    @Composable
+    get() = LocalNoteColors.current
