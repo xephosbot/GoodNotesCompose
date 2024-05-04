@@ -6,10 +6,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -25,9 +28,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.xbot.goodnotes.R
-import com.xbot.ui.component.SegmentedButton
-import com.xbot.ui.component.SegmentedButtonDefaults
-import com.xbot.ui.component.SingleChoiceSegmentedButtonRow
 import com.xbot.ui.theme.supportsDynamicTheming
 
 @Composable
@@ -61,7 +61,7 @@ private fun SettingsScreenContent(
                 onAction(SettingsScreenAction.ChangeAppTheme(themeId))
             }
         )
-        Divider(
+        HorizontalDivider(
             modifier = Modifier.padding(horizontal = 20.dp)
         )
         SettingsDynamicThemeSwitch(

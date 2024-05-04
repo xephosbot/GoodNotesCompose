@@ -22,5 +22,7 @@
     <string name="dialog_add_new_folder_button_dismiss">Cancel</string>
     <string name="context_menu_delete">Delete</string>
     <string name="context_menu_add_note_to_folder">Add to folders</string>
+    <string name="text_field_hint_title">Title</string>
+    <string name="text_field_hint_content">Text</string>
     <string name="empty_screen_placeholder_text">You don\'t have any notes,\nclick on + to create a new one.</string>
 </resources>

@@ -35,10 +35,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.xbot.goodnotes.R
 import com.xbot.goodnotes.ui.plus
 import com.xbot.ui.component.Scaffold
 import com.xbot.ui.component.ShapedIconButtonDefaults
@@ -116,12 +118,12 @@ fun NoteDetailScreenContent(
         ) {
             TextField(
                 state = titleTextFieldState,
-                hint = "Title",
+                hint = stringResource(R.string.text_field_hint_title),
                 textStyle = MaterialTheme.typography.displayMedium
             )
             TextField(
                 state = contentTextFieldState,
-                hint = "Content",
+                hint = stringResource(R.string.text_field_hint_content),
                 textStyle = MaterialTheme.typography.bodyLarge
             )
         }

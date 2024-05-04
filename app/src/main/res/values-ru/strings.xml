@@ -24,5 +24,7 @@
     <string name="dialog_add_new_folder_button_dismiss">Отмена</string>
     <string name="context_menu_delete">Удалить</string>
     <string name="context_menu_add_note_to_folder">Добавить в папки</string>
+    <string name="text_field_hint_title">Заголовок</string>
+    <string name="text_field_hint_content">Текст</string>
     <string name="empty_screen_placeholder_text">У вас нет заметок,\nнажмите на + чтобы создать новую.</string>
 </resources>
