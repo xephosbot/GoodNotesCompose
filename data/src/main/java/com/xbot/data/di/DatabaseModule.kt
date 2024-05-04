@@ -3,6 +3,7 @@ package com.xbot.data.di
 import android.content.Context
 import androidx.room.Room
 import com.xbot.data.AppDatabase
+import com.xbot.data.BuildConfig
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -16,10 +17,18 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase {
-        return Room.databaseBuilder(
-            context,
-            AppDatabase::class.java,
-            AppDatabase.DATABASE_NAME
-        ).createFromAsset("database/goodnotes_release.db").build()
+        return if (BuildConfig.DEBUG) {
+            Room.databaseBuilder(
+                context,
+                AppDatabase::class.java,
+                AppDatabase.DATABASE_NAME
+            ).createFromAsset("database/goodnotes_debug.db").build()
+        } else {
+            Room.databaseBuilder(
+                context,
+                AppDatabase::class.java,
+                AppDatabase.DATABASE_NAME
+            ).build()
+        }
     }
 }

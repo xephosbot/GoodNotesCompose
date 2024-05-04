@@ -18,6 +18,7 @@
         <item quantity="few">%d заметки были удалены</item>
         <item quantity="many">%d заметок были удалены</item>
     </plurals>
+    <string name="snackbar_add_note_to_folder_error">У вас ещё нет пользовательских папок</string>
     <string name="dialog_add_new_folder_title">Новая папка</string>
     <string name="dialog_add_new_folder_textfield_hint">Название папки</string>
     <string name="dialog_add_new_folder_button_confirm">Сохранить</string>

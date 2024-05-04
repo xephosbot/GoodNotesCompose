@@ -125,7 +125,7 @@ private fun NoteScreenContent(
                 },
                 onChangeFolderClick = {
                     onAction(NoteScreenAction.UpdateRelatedFolders(selectionState.selectedItems))
-                    showChangeFolderBottomSheet = true
+                    if (state.foldersList.isNotEmpty()) showChangeFolderBottomSheet = true
                 },
                 onClearClick = {
                     selectionState.clear()

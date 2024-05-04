@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="Encoding">
-    <file url="file://$PROJECT_DIR$/data/src/main/assets/database/goodnotes_release.db" charset="windows-1251" />
+    <file url="file://$PROJECT_DIR$/data/src/main/assets/database/goodnotes_debug.db" charset="windows-1251" />
   </component>
 </project>

@@ -16,6 +16,7 @@
         <item quantity="one">%d note was deleted</item>
         <item quantity="other">%d notes were deleted</item>
     </plurals>
+    <string name="snackbar_add_note_to_folder_error">You don\'t have any custom folders yet</string>
     <string name="dialog_add_new_folder_title">Add new folder</string>
     <string name="dialog_add_new_folder_textfield_hint">Folder name</string>
     <string name="dialog_add_new_folder_button_confirm">Save</string>

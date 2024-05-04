@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.update
 data class Message(
     val id: Long,
     val title: MessageContent,
-    val action: MessageAction?
+    val action: MessageAction? = null
 )
 
 data class MessageAction(

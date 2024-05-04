@@ -78,9 +78,9 @@ class NoteViewModel @Inject constructor(
             }
 
             is NoteScreenAction.AddFolder -> {
-                val folder = FolderModel(name = action.name)
+                val folder = Folder(name = action.name)
                 viewModelScope.launch(Dispatchers.IO) {
-                    addFolder(folder)
+                    addFolder(folder.mapToDomainModel())
                 }
             }
 
@@ -90,70 +90,81 @@ class NoteViewModel @Inject constructor(
                 }
             }
 
-            is NoteScreenAction.DeleteNotes -> {
-                val actionId = UUID.randomUUID().mostSignificantBits
-                viewModelScope.launch(Dispatchers.IO) {
-                    deleteNotes(
-                        notes = action.notes.map(Note::mapToDomainModel),
-                        folderId = state.value.currentFolderId,
-                        actionId = actionId
-                    )
-                    snackbarManager.showMessage(
-                        Message(
-                            id = actionId,
-                            title = MessageContent.Plurals(
-                                pluralsId = R.plurals.notes_delete_snackbar,
-                                quantity = action.notes.count()
-                            ),
-                            action = MessageAction(textId = R.string.notes_cancel_snackbar) {
-                                viewModelScope.launch(Dispatchers.IO) {
-                                    restoreNotes(actionId)
-                                }
-                            }
-                        )
-                    )
-                }
-            }
+            is NoteScreenAction.DeleteNotes -> deleteNotes(action.notes, UUID.randomUUID().mostSignificantBits)
 
-            is NoteScreenAction.DeleteFolder -> {
-                val newFolderId = when (action.folder.id) {
-                    currentFolderId.value -> Constants.DEFAULT_FOLDER_ID
-                    else -> currentFolderId.value
-                }
-                viewModelScope.launch(Dispatchers.IO) {
-                    deleteFolder(action.folder.mapToDomainModel())
-                    currentFolderId.update { newFolderId }
-                }
-            }
+            is NoteScreenAction.DeleteFolder -> deleteFolder(action.folder)
 
-            is NoteScreenAction.UpdateRelatedFolders -> {
-                viewModelScope.launch(Dispatchers.IO) {
-                    val folders = action.notes.flatMap { note ->
-                        getFoldersRelatedToNote(note.id)
-                    }.toSet()
-                    relatedFolders.update { folders.map(FolderModel::mapToUIModel) }
-                }
-            }
+            is NoteScreenAction.UpdateRelatedFolders -> updateRelatedFolders(action.notes)
 
-            is NoteScreenAction.ChangeFolderForNotes -> {
-                viewModelScope.launch(Dispatchers.IO) {
-                    when (action.value) {
-                        true -> {
-                            addNotes(
-                                notes = action.notes.map(Note::mapToDomainModel),
-                                folderId = action.folder.id
-                            )
-                            relatedFolders.update { it + action.folder }
-                        }
-                        else -> {
-                            deleteNotes(
-                                notes = action.notes.map(Note::mapToDomainModel),
-                                folderId = action.folder.id,
-                                actionId = UUID.randomUUID().mostSignificantBits
-                            )
-                            relatedFolders.update { it - action.folder }
+            is NoteScreenAction.ChangeFolderForNotes -> changeFolderForNotes(action.notes, action.folder, action.value)
+        }
+    }
+
+    private fun deleteNotes(notes: List<Note>, actionId: Long) {
+        viewModelScope.launch(Dispatchers.IO) {
+            deleteNotes(
+                notes = notes.map(Note::mapToDomainModel),
+                folderId = state.value.currentFolderId,
+                actionId = actionId
+            )
+            snackbarManager.showMessage(
+                Message(
+                    id = actionId,
+                    title = MessageContent.Plurals(
+                        pluralsId = R.plurals.notes_delete_snackbar,
+                        quantity = notes.count()
+                    ),
+                    action = MessageAction(textId = R.string.notes_cancel_snackbar) {
+                        viewModelScope.launch(Dispatchers.IO) {
+                            restoreNotes(actionId)
                         }
                     }
+                )
+            )
+        }
+    }
+
+    private fun deleteFolder(folder: Folder) {
+        val newFolderId = when (folder.id) {
+            currentFolderId.value -> Constants.DEFAULT_FOLDER_ID
+            else -> currentFolderId.value
+        }
+        viewModelScope.launch(Dispatchers.IO) {
+            deleteFolder(folder.mapToDomainModel())
+            currentFolderId.update { newFolderId }
+            relatedFolders.update { it - folder }
+        }
+    }
+
+    private fun updateRelatedFolders(notes: List<Note>) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val folders = notes.flatMap { note ->
+                getFoldersRelatedToNote(note.id)
+            }.toSet()
+            relatedFolders.update { folders.map(FolderModel::mapToUIModel) }
+            if (state.value.foldersList.isEmpty()) {
+                snackbarManager.showMessage(
+                    Message(
+                        id = UUID.randomUUID().mostSignificantBits,
+                        title = MessageContent.Text(
+                            textId = R.string.snackbar_add_note_to_folder_error
+                        )
+                    )
+                )
+            }
+        }
+    }
+
+    private fun changeFolderForNotes(notes: List<Note>, folder: Folder, value: Boolean) {
+        viewModelScope.launch(Dispatchers.IO) {
+            when (value) {
+                true -> {
+                    addNotes(notes = notes.map(Note::mapToDomainModel), folderId = folder.id)
+                    relatedFolders.update { it + folder }
+                }
+                else -> {
+                    deleteNotes(notes = notes.map(Note::mapToDomainModel), folderId = folder.id, actionId = UUID.randomUUID().mostSignificantBits)
+                    relatedFolders.update { it - folder }
                 }
             }
         }
