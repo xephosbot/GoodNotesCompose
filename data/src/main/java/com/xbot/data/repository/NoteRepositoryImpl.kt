@@ -50,12 +50,12 @@ class NoteRepositoryImpl @Inject constructor(
 
     override suspend fun deleteNotes(notes: List<NoteModel>, folderId: Long, actionId: Long) {
         val dataNotes = when (folderId) {
-            Constants.DEFAULT_FOLDER_ID -> notes.map(NoteModel::mapToDataModel)
+            Constants.DEFAULT_FOLDER_ID, Constants.FAVORITE_FOLDER_ID -> notes.map(NoteModel::mapToDataModel)
             else -> emptyList()
         }
 
         val crossRefs = when (folderId) {
-            Constants.DEFAULT_FOLDER_ID -> notes.flatMap { note ->
+            Constants.DEFAULT_FOLDER_ID, Constants.FAVORITE_FOLDER_ID -> notes.flatMap { note ->
                 noteFolderCrossRefDao.getCrossRefsForNote(note.id)
             }
             else -> notes.map { note -> NoteFolderCrossRef(note.id, folderId) }
@@ -64,7 +64,7 @@ class NoteRepositoryImpl @Inject constructor(
         deletedItems[actionId] = DeletedItems(notes = dataNotes, crossRefs = crossRefs)
 
         when (folderId) {
-            Constants.DEFAULT_FOLDER_ID -> noteDao.deleteAll(dataNotes)
+            Constants.DEFAULT_FOLDER_ID, Constants.FAVORITE_FOLDER_ID -> noteDao.deleteAll(dataNotes)
             else -> noteFolderCrossRefDao.deleteAll(crossRefs)
         }
     }

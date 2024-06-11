@@ -58,7 +58,7 @@ fun <T, K> LazyVerticalStaggeredGridWithSelection(
         horizontalArrangement = Arrangement.spacedBy(horizontalItemSpacing)
     ) {
         items(items, key) { item ->
-            Box(modifier = Modifier.animateItemPlacement()) {
+            Box(modifier = Modifier.animateItem()) {
                 with(selectionState) {
                     content(item, item.selected)
                 }

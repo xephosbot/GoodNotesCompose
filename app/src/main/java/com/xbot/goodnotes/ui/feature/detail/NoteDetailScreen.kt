@@ -7,14 +7,17 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text2.BasicTextField2
-import androidx.compose.foundation.text2.input.TextFieldState
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.BottomAppBarDefaults
@@ -228,7 +231,6 @@ private fun NoteDetailScreenBottomAppBar(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun TextField(
     modifier: Modifier = Modifier,
@@ -236,7 +238,7 @@ private fun TextField(
     hint: String,
     textStyle: TextStyle
 ) {
-    BasicTextField2(
+    BasicTextField(
         modifier = modifier,
         state = state,
         textStyle = textStyle.copy(color = LocalContentColor.current),
@@ -266,14 +268,14 @@ private fun ColorPickerBottomSheet(
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
-        windowInsets = WindowInsets(0),
         containerColor = containerColor,
         contentColor = contentColor
     ) {
         BottomAppBar(
             modifier = modifier,
             containerColor = Color.Transparent,
-            contentColor = contentColor
+            contentColor = contentColor,
+            windowInsets = WindowInsets.systemBars.only(WindowInsetsSides.Bottom)
         ) {
             LazyRow(
                 contentPadding = PaddingValues(horizontal = 8.dp),

@@ -7,15 +7,12 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.toggleable
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,10 +34,6 @@ fun ShapedIconButton(
     interactionSource: MutableInteractionSource? = null,
     content: @Composable () -> Unit
 ) {
-    // TODO: Delete this after Compose 1.7.0
-    @Suppress("NAME_SHADOWING")
-    val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
-
     Box(
         modifier = modifier
             .size(size)
@@ -71,10 +64,6 @@ fun FilledShapedIconButton(
     interactionSource: MutableInteractionSource? = null,
     content: @Composable () -> Unit
 ) {
-    // TODO: Delete this after Compose 1.7.0
-    @Suppress("NAME_SHADOWING")
-    val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
-
     Box(
         modifier = modifier
             .size(size)
@@ -106,10 +95,6 @@ fun ShapedIconToggleButton(
     interactionSource: MutableInteractionSource? = null,
     content: @Composable () -> Unit
 ) {
-    // TODO: Delete this after Compose 1.7.0
-    @Suppress("NAME_SHADOWING")
-    val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
-
     Box(
         modifier = modifier
             .size(size)

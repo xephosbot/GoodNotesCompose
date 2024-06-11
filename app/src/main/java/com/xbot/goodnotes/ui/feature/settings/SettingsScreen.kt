@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -20,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -141,6 +143,7 @@ private fun SettingsDynamicThemeSwitch(
             onCheckedChange(!checked)
         },
         enabled = enabled,
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
         interactionSource = interactionSource
     ) {
         ListItem(
@@ -161,7 +164,8 @@ private fun SettingsDynamicThemeSwitch(
                     enabled = enabled,
                     interactionSource = interactionSource
                 )
-            }
+            },
+            colors = ListItemDefaults.colors(containerColor = Color.Transparent)
         )
     }
 }

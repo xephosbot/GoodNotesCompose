@@ -5,16 +5,17 @@ package com.xbot.ui.component
 import android.content.res.Resources
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.displayCutout
-import androidx.compose.foundation.layout.exclude
-import androidx.compose.foundation.layout.onConsumedWindowInsetsChanged
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MutableWindowInsets
 import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
@@ -56,17 +57,15 @@ fun Scaffold(
     contentWindowInsets: WindowInsets = ScaffoldDefaults.contentWindowInsets,
     content: @Composable (PaddingValues) -> Unit
 ) {
-    val safeInsets = remember(contentWindowInsets) { MutableWindowInsets(contentWindowInsets) }
     Surface(
-        modifier = modifier.onConsumedWindowInsetsChanged { consumedWindowInsets ->
-            // Exclude currently consumed window insets from user provided contentWindowInsets
-            safeInsets.insets = contentWindowInsets.exclude(consumedWindowInsets)
-        },
+        modifier = modifier,
         color = containerColor,
         contentColor = contentColor
     ) {
         ScaffoldLayout(
-            modifier = Modifier.windowInsetsPadding(WindowInsets.displayCutout),
+            modifier = Modifier.windowInsetsPadding(
+                WindowInsets.systemBars.union(WindowInsets.displayCutout).only(WindowInsetsSides.Horizontal)
+            ),
             fabPosition = floatingActionButtonPosition,
             topBar = topBar,
             bottomBar = bottomBar,
@@ -79,7 +78,7 @@ fun Scaffold(
                     )
                 }
             },
-            contentWindowInsets = safeInsets,
+            contentWindowInsets = contentWindowInsets,
             fab = floatingActionButton
         )
     }
