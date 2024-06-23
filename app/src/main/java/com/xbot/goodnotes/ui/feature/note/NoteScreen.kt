@@ -2,6 +2,8 @@ package com.xbot.goodnotes.ui.feature.note
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -22,6 +24,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
@@ -59,6 +62,9 @@ import com.xbot.goodnotes.R
 import com.xbot.goodnotes.convertToDateTime
 import com.xbot.goodnotes.model.Folder
 import com.xbot.goodnotes.model.Note
+import com.xbot.goodnotes.navigation.LocalSharedElementScopes
+import com.xbot.goodnotes.navigation.NoteSharedElementKey
+import com.xbot.goodnotes.navigation.SnackSharedElementType
 import com.xbot.goodnotes.ui.plus
 import com.xbot.ui.component.AnimatedFloatingActionButton
 import com.xbot.ui.component.FilledShapedIconButton
@@ -94,7 +100,10 @@ fun NoteScreen(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
+@OptIn(
+    ExperimentalMaterial3Api::class,
+    ExperimentalAnimationApi::class
+)
 @Composable
 private fun NoteScreenContent(
     modifier: Modifier = Modifier,
@@ -526,7 +535,10 @@ private fun NoteLazyGrid(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(
+    ExperimentalFoundationApi::class,
+    ExperimentalSharedTransitionApi::class
+)
 @Composable
 private fun NoteCard(
     modifier: Modifier = Modifier,
@@ -536,56 +548,88 @@ private fun NoteCard(
     onLongClick: () -> Unit,
     onFavoriteClick: () -> Unit
 ) {
-    NoteCard(
-        modifier = modifier,
-        selected = selected,
-        colors = NoteCardDefaults.noteCardColors(
-            containerColor = MaterialTheme.noteColors[note.colorId].harmonized
-        ),
-        headlineContent = {
-            Text(
-                text = note.title,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.titleMedium
-            )
-        },
-        trailingContent = {
-            ShapedIconToggleButton(
-                checked = selected,
-                onCheckedChange = { onFavoriteClick() }
-            ) {
-                Icon(
-                    imageVector = if (!selected) {
-                        if (!note.isFavorite) {
-                            Icons.FavoriteBorder
-                        } else {
-                            Icons.Favorite
-                        }
-                    } else {
-                        Icons.Done
-                    },
-                    contentDescription = ""
+    val sharedTransitionScope = LocalSharedElementScopes.current.sharedTransitionScope
+        ?: throw IllegalArgumentException("No Scope found")
+    val animatedVisibilityScope = LocalSharedElementScopes.current.animatedVisibilityScope
+        ?: throw IllegalArgumentException("No Scope found")
+
+    with(sharedTransitionScope) {
+        NoteCard(
+            modifier = modifier
+                .sharedBounds(
+                    sharedContentState = rememberSharedContentState(
+                        key = NoteSharedElementKey(note.id, SnackSharedElementType.Bounds)
+                    ),
+                    animatedVisibilityScope = animatedVisibilityScope,
+                    resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
+                    clipInOverlayDuringTransition = OverlayClip(RoundedCornerShape(48.dp))
+                ),
+            selected = selected,
+            colors = NoteCardDefaults.noteCardColors(
+                containerColor = MaterialTheme.noteColors[note.colorId].harmonized
+            ),
+            headlineContent = {
+                Text(
+                    modifier = Modifier
+                        .sharedBounds(
+                            sharedContentState = rememberSharedContentState(
+                                key = NoteSharedElementKey(note.id, SnackSharedElementType.Title)
+                            ),
+                            animatedVisibilityScope = animatedVisibilityScope,
+                            resizeMode = SharedTransitionScope.ResizeMode.ScaleToBounds(alignment = Alignment.TopStart)
+                        )
+                        .skipToLookaheadSize(),
+                    text = note.title,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.titleMedium
                 )
-            }
-        },
-        supportingContent = {
-            Text(
-                text = note.timeStamp.convertToDateTime(),
-                style = MaterialTheme.typography.titleSmall
-            )
-        },
-        bodyContent = {
-            Text(
-                text = note.content,
-                maxLines = 5,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.bodySmall
-            )
-        },
-        onClick = { onClick() },
-        onLongClick = { onLongClick() }
-    )
+            },
+            trailingContent = {
+                ShapedIconToggleButton(
+                    checked = selected,
+                    onCheckedChange = { onFavoriteClick() }
+                ) {
+                    Icon(
+                        imageVector = if (!selected) {
+                            if (!note.isFavorite) {
+                                Icons.FavoriteBorder
+                            } else {
+                                Icons.Favorite
+                            }
+                        } else {
+                            Icons.Done
+                        },
+                        contentDescription = ""
+                    )
+                }
+            },
+            supportingContent = {
+                Text(
+                    text = note.timeStamp.convertToDateTime(),
+                    style = MaterialTheme.typography.titleSmall
+                )
+            },
+            bodyContent = {
+                Text(
+                    modifier = Modifier
+                        .sharedBounds(
+                            sharedContentState = rememberSharedContentState(
+                                key = NoteSharedElementKey(note.id, SnackSharedElementType.Content)
+                            ),
+                            animatedVisibilityScope = animatedVisibilityScope
+                        )
+                        .skipToLookaheadSize(),
+                    text = note.content,
+                    maxLines = 5,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            },
+            onClick = { onClick() },
+            onLongClick = { onLongClick() }
+        )
+    }
 }
 
 @Composable

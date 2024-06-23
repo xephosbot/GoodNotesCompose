@@ -1,5 +1,7 @@
 package com.xbot.goodnotes.ui.feature.detail
 
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
@@ -16,6 +18,7 @@ import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.verticalScroll
@@ -35,6 +38,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -44,6 +48,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.xbot.goodnotes.R
+import com.xbot.goodnotes.navigation.LocalSharedElementScopes
+import com.xbot.goodnotes.navigation.NoteSharedElementKey
+import com.xbot.goodnotes.navigation.SnackSharedElementType
 import com.xbot.goodnotes.ui.plus
 import com.xbot.ui.component.Scaffold
 import com.xbot.ui.component.ShapedIconButtonDefaults
@@ -52,7 +59,6 @@ import com.xbot.ui.icon.Icons
 import com.xbot.ui.theme.harmonized
 import com.xbot.ui.theme.noteColors
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun NoteDetailScreen(
     viewModel: NoteDetailViewModel = hiltViewModel(),
@@ -68,7 +74,10 @@ fun NoteDetailScreen(
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(
+    ExperimentalFoundationApi::class,
+    ExperimentalSharedTransitionApi::class
+)
 @Composable
 fun NoteDetailScreenContent(
     modifier: Modifier = Modifier,
@@ -80,55 +89,87 @@ fun NoteDetailScreenContent(
 ) {
     var showColorPickerBottomSheet by remember { mutableStateOf(false) }
 
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            NoteDetailScreenAppBar(
-                isFavorite = state.noteIsFavorite,
-                containerColor = Color.Transparent,
-                onArrowBackClick = {
-                    onAction(NoteDetailScreenAction.Save)
-                    onNavigateBack()
-                },
-                onFavoriteClick = {
-                    onAction(NoteDetailScreenAction.UpdateNote(!state.noteIsFavorite))
-                }
-            )
-        },
-        bottomBar = {
-            NoteDetailScreenBottomAppBar(
-                containerColor = MaterialTheme.noteColors[state.noteColorId].harmonized,
-                canUndo = contentTextFieldState.undoState.canUndo,
-                canRedo = contentTextFieldState.undoState.canRedo,
-                onPaletteClick = {
-                    showColorPickerBottomSheet = true
-                },
-                onUndoClick = {
-                    contentTextFieldState.undoState.undo()
-                },
-                onRedoClick = {
-                    contentTextFieldState.undoState.redo()
-                }
-            )
-        },
-        containerColor = MaterialTheme.noteColors[state.noteColorId].harmonized,
-        contentColor = MaterialTheme.colorScheme.onSurface
-    ) { contentPadding ->
-        Column(
-            modifier = Modifier
-                .padding(contentPadding + PaddingValues(horizontal = 16.dp))
-                .verticalScroll(rememberScrollState())
-        ) {
-            TextField(
-                state = titleTextFieldState,
-                hint = stringResource(R.string.text_field_hint_title),
-                textStyle = MaterialTheme.typography.displayMedium
-            )
-            TextField(
-                state = contentTextFieldState,
-                hint = stringResource(R.string.text_field_hint_content),
-                textStyle = MaterialTheme.typography.bodyLarge
-            )
+    val sharedTransitionScope = LocalSharedElementScopes.current.sharedTransitionScope
+        ?: throw IllegalArgumentException("No Scope found")
+    val animatedVisibilityScope = LocalSharedElementScopes.current.animatedVisibilityScope
+        ?: throw IllegalArgumentException("No Scope found")
+
+    with(sharedTransitionScope) {
+        Scaffold(
+            modifier = modifier
+                .sharedBounds(
+                    sharedContentState = rememberSharedContentState(
+                        key = NoteSharedElementKey(state.noteId, SnackSharedElementType.Bounds)
+                    ),
+                    animatedVisibilityScope = animatedVisibilityScope,
+                    resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
+                    clipInOverlayDuringTransition = OverlayClip(RoundedCornerShape(48.dp))
+                ),
+            topBar = {
+                NoteDetailScreenAppBar(
+                    isFavorite = state.noteIsFavorite,
+                    containerColor = Color.Transparent,
+                    onArrowBackClick = {
+                        onAction(NoteDetailScreenAction.Save)
+                        onNavigateBack()
+                    },
+                    onFavoriteClick = {
+                        onAction(NoteDetailScreenAction.UpdateNote(!state.noteIsFavorite))
+                    }
+                )
+            },
+            bottomBar = {
+                NoteDetailScreenBottomAppBar(
+                    containerColor = MaterialTheme.noteColors[state.noteColorId].harmonized,
+                    canUndo = contentTextFieldState.undoState.canUndo,
+                    canRedo = contentTextFieldState.undoState.canRedo,
+                    onPaletteClick = {
+                        showColorPickerBottomSheet = true
+                    },
+                    onUndoClick = {
+                        contentTextFieldState.undoState.undo()
+                    },
+                    onRedoClick = {
+                        contentTextFieldState.undoState.redo()
+                    }
+                )
+            },
+            containerColor = MaterialTheme.noteColors[state.noteColorId].harmonized,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        ) { contentPadding ->
+            Column(
+                modifier = Modifier
+                    .padding(contentPadding + PaddingValues(horizontal = 16.dp))
+                    .verticalScroll(rememberScrollState())
+            ) {
+                TextField(
+                    modifier = Modifier
+                        .sharedBounds(
+                            sharedContentState = rememberSharedContentState(
+                                key = NoteSharedElementKey(state.noteId, SnackSharedElementType.Title)
+                            ),
+                            animatedVisibilityScope = animatedVisibilityScope,
+                            resizeMode = SharedTransitionScope.ResizeMode.ScaleToBounds(alignment = Alignment.TopStart)
+                        )
+                        .skipToLookaheadSize(),
+                    state = titleTextFieldState,
+                    hint = stringResource(R.string.text_field_hint_title),
+                    textStyle = MaterialTheme.typography.displayMedium
+                )
+                TextField(
+                    modifier = Modifier
+                        .sharedBounds(
+                            sharedContentState = rememberSharedContentState(
+                                key = NoteSharedElementKey(state.noteId, SnackSharedElementType.Content)
+                            ),
+                            animatedVisibilityScope = animatedVisibilityScope
+                        )
+                        .skipToLookaheadSize(),
+                    state = contentTextFieldState,
+                    hint = stringResource(R.string.text_field_hint_content),
+                    textStyle = MaterialTheme.typography.bodyLarge
+                )
+            }
         }
     }
 

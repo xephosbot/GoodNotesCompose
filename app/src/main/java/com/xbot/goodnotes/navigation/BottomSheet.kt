@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.material.navigation.BottomSheetNavigator
+import androidx.compose.material.navigation.ModalBottomSheetLayout
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Surface
@@ -26,16 +28,17 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDeepLink
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.get
-import com.google.accompanist.navigation.material.BottomSheetNavigator
-import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
-import com.google.accompanist.navigation.material.ModalBottomSheetLayout
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialNavigationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ModalBottomSheetLayout(
     bottomSheetNavigator: BottomSheetNavigator,
     modifier: Modifier = Modifier,
+    sheetMaxWidth: Dp = BottomSheetDefaults.SheetMaxWidth,
+    shape: Shape = BottomSheetDefaults.ExpandedShape,
     containerColor: Color = BottomSheetDefaults.ContainerColor,
+    contentColor: Color = contentColorFor(containerColor),
+    tonalElevation: Dp = 0.dp,
     scrimColor: Color = BottomSheetDefaults.ScrimColor,
     content: @Composable () -> Unit
 ) {
@@ -45,13 +48,13 @@ fun ModalBottomSheetLayout(
         sheetShape = RectangleShape,
         sheetElevation = 0.dp,
         sheetBackgroundColor = Color.Transparent,
-        sheetContentColor = containerColor,
+        sheetContentColor = contentColor,
         scrimColor = scrimColor,
         content = content
     )
 }
 
-@ExperimentalMaterialNavigationApi
+@ExperimentalMaterial3Api
 fun NavGraphBuilder.bottomSheet(
     route: String,
     arguments: List<NamedNavArgument> = emptyList(),
@@ -78,7 +81,7 @@ fun NavGraphBuilder.bottomSheet(
 @Composable
 private fun BottomSheet(
     modifier: Modifier = Modifier,
-    sheetMaxWidth: Dp = BottomSheetDefaults.MaxWidth,
+    sheetMaxWidth: Dp = BottomSheetDefaults.SheetMaxWidth,
     shape: Shape = BottomSheetDefaults.ExpandedShape,
     containerColor: Color = BottomSheetDefaults.ContainerColor,
     contentColor: Color = contentColorFor(containerColor),
@@ -110,7 +113,3 @@ private fun BottomSheet(
         }
     }
 }
-
-@OptIn(ExperimentalMaterial3Api::class)
-private val BottomSheetDefaults.MaxWidth: Dp
-    get() = 640.dp
