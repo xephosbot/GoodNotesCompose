@@ -2,12 +2,12 @@
 accompanist = "0.32.0"
 androidDesugarJdkLibs = "2.0.4"
 # AGP and tools should be updated together
-androidGradlePlugin = "8.4.1"
-androidTools = "31.4.1"
+androidGradlePlugin = "8.5.0"
+androidTools = "31.5.0"
 androidxActivity = "1.9.0"
 androidxAppCompat = "1.7.0"
 androidxBrowser = "1.6.0"
-androidxComposeBom = "2024.05.00"
+androidxComposeBom = "2024.06.00"
 androidxComposeBomAlpha = "2024.05.00-alpha03"
 androidxComposeCompiler = "1.5.7"
 androidxComposeRuntimeTracing = "1.0.0-beta01"
@@ -16,7 +16,7 @@ androidxCoreSplashscreen = "1.2.0-alpha01"
 androidxDataStore = "1.1.1"
 androidxEspresso = "3.5.1"
 androidxHiltNavigationCompose = "1.2.0"
-androidxLifecycle = "2.7.0"
+androidxLifecycle = "2.8.2"
 androidxMacroBenchmark = "1.2.4"
 androidxMetrics = "1.0.0-beta01"
 androidxNavigation = "2.7.7"
@@ -79,6 +79,7 @@ androidx-compose-foundation-layout = { group = "androidx.compose.foundation", na
 androidx-compose-material-iconsExtended = { group = "androidx.compose.material", name = "material-icons-extended" }
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-compose-material3-windowSizeClass = { group = "androidx.compose.material3", name = "material3-window-size-class" }
+androidx-compose-material-navigation = { group = "androidx.compose.material", name = "material-navigation" }
 androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime" }
 androidx-compose-ui-test = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-compose-ui-testManifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }

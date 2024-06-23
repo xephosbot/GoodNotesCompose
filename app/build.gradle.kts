@@ -77,10 +77,8 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewModelCompose)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.androidx.compose.material.navigation)
     implementation(libs.androidx.profileinstaller)
-
-    // Accompanist dependencies
-    implementation(libs.accompanist.navigation)
 
     // Compose dependencies
     implementation(libs.androidx.compose.runtime)
