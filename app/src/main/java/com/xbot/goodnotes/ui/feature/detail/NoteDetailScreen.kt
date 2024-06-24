@@ -1,5 +1,7 @@
 package com.xbot.goodnotes.ui.feature.detail
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.BorderStroke
@@ -38,7 +40,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -50,7 +51,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.xbot.goodnotes.R
 import com.xbot.goodnotes.navigation.LocalSharedElementScopes
 import com.xbot.goodnotes.navigation.NoteSharedElementKey
-import com.xbot.goodnotes.navigation.SnackSharedElementType
+import com.xbot.goodnotes.navigation.NoteSharedElementType
 import com.xbot.goodnotes.ui.plus
 import com.xbot.ui.component.Scaffold
 import com.xbot.ui.component.ShapedIconButtonDefaults
@@ -65,6 +66,7 @@ fun NoteDetailScreen(
     onNavigateBack: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
     NoteDetailScreenContent(
         state = state,
         titleTextFieldState = viewModel.titleTextFieldState,
@@ -99,11 +101,20 @@ fun NoteDetailScreenContent(
             modifier = modifier
                 .sharedBounds(
                     sharedContentState = rememberSharedContentState(
-                        key = NoteSharedElementKey(state.noteId, SnackSharedElementType.Bounds)
+                        key = NoteSharedElementKey(state.noteId, NoteSharedElementType.Bounds)
                     ),
                     animatedVisibilityScope = animatedVisibilityScope,
+                    enter = EnterTransition.None,
+                    exit = ExitTransition.None,
                     resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
                     clipInOverlayDuringTransition = OverlayClip(RoundedCornerShape(48.dp))
+                ),
+            contentModifier = Modifier
+                .sharedBounds(
+                    sharedContentState = rememberSharedContentState(
+                        key = NoteSharedElementKey(state.noteId, NoteSharedElementType.Content)
+                    ),
+                    animatedVisibilityScope = animatedVisibilityScope,
                 ),
             topBar = {
                 NoteDetailScreenAppBar(
@@ -144,13 +155,6 @@ fun NoteDetailScreenContent(
             ) {
                 TextField(
                     modifier = Modifier
-                        .sharedBounds(
-                            sharedContentState = rememberSharedContentState(
-                                key = NoteSharedElementKey(state.noteId, SnackSharedElementType.Title)
-                            ),
-                            animatedVisibilityScope = animatedVisibilityScope,
-                            resizeMode = SharedTransitionScope.ResizeMode.ScaleToBounds(alignment = Alignment.TopStart)
-                        )
                         .skipToLookaheadSize(),
                     state = titleTextFieldState,
                     hint = stringResource(R.string.text_field_hint_title),
@@ -158,12 +162,6 @@ fun NoteDetailScreenContent(
                 )
                 TextField(
                     modifier = Modifier
-                        .sharedBounds(
-                            sharedContentState = rememberSharedContentState(
-                                key = NoteSharedElementKey(state.noteId, SnackSharedElementType.Content)
-                            ),
-                            animatedVisibilityScope = animatedVisibilityScope
-                        )
                         .skipToLookaheadSize(),
                     state = contentTextFieldState,
                     hint = stringResource(R.string.text_field_hint_content),

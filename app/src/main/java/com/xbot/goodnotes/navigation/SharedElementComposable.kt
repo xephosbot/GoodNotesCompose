@@ -53,11 +53,10 @@ data class SharedElementScopes (
 
 data class NoteSharedElementKey(
     val noteId: Long,
-    val type: SnackSharedElementType
+    val type: NoteSharedElementType
 )
 
-enum class SnackSharedElementType {
+enum class NoteSharedElementType {
     Bounds,
-    Title,
     Content
 }

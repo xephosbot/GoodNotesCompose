@@ -1,6 +1,8 @@
 package com.xbot.goodnotes.ui.feature.note
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
@@ -64,7 +66,7 @@ import com.xbot.goodnotes.model.Folder
 import com.xbot.goodnotes.model.Note
 import com.xbot.goodnotes.navigation.LocalSharedElementScopes
 import com.xbot.goodnotes.navigation.NoteSharedElementKey
-import com.xbot.goodnotes.navigation.SnackSharedElementType
+import com.xbot.goodnotes.navigation.NoteSharedElementType
 import com.xbot.goodnotes.ui.plus
 import com.xbot.ui.component.AnimatedFloatingActionButton
 import com.xbot.ui.component.FilledShapedIconButton
@@ -209,7 +211,13 @@ private fun NoteScreenContent(
                 state.relatedFolders.contains(folder)
             },
             onFolderCheckedChange = { folder, checked ->
-                onAction(NoteScreenAction.ChangeFolderForNotes(selectionState.selectedItems, folder, checked))
+                onAction(
+                    NoteScreenAction.ChangeFolderForNotes(
+                        notes = selectionState.selectedItems,
+                        folder = folder,
+                        value = checked
+                    )
+                )
             },
             onDismissRequest = {
                 showChangeFolderBottomSheet = false
@@ -435,7 +443,8 @@ private fun ChangeFolderBottomSheet(
         onDismissRequest = onDismissRequest
     ) {
         LazyColumn(
-            contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Bottom).asPaddingValues()
+            contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Bottom)
+                .asPaddingValues()
         ) {
             items(
                 items = items,
@@ -558,11 +567,21 @@ private fun NoteCard(
             modifier = modifier
                 .sharedBounds(
                     sharedContentState = rememberSharedContentState(
-                        key = NoteSharedElementKey(note.id, SnackSharedElementType.Bounds)
+                        key = NoteSharedElementKey(note.id, NoteSharedElementType.Bounds)
                     ),
                     animatedVisibilityScope = animatedVisibilityScope,
+                    enter = EnterTransition.None,
+                    exit = ExitTransition.None,
                     resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
                     clipInOverlayDuringTransition = OverlayClip(RoundedCornerShape(48.dp))
+                ),
+            contentModifier = Modifier
+                .sharedBounds(
+                    sharedContentState = rememberSharedContentState(
+                        key = NoteSharedElementKey(note.id, NoteSharedElementType.Content)
+                    ),
+                    resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
+                    animatedVisibilityScope = animatedVisibilityScope,
                 ),
             selected = selected,
             colors = NoteCardDefaults.noteCardColors(
@@ -571,13 +590,6 @@ private fun NoteCard(
             headlineContent = {
                 Text(
                     modifier = Modifier
-                        .sharedBounds(
-                            sharedContentState = rememberSharedContentState(
-                                key = NoteSharedElementKey(note.id, SnackSharedElementType.Title)
-                            ),
-                            animatedVisibilityScope = animatedVisibilityScope,
-                            resizeMode = SharedTransitionScope.ResizeMode.ScaleToBounds(alignment = Alignment.TopStart)
-                        )
                         .skipToLookaheadSize(),
                     text = note.title,
                     maxLines = 2,
@@ -587,6 +599,8 @@ private fun NoteCard(
             },
             trailingContent = {
                 ShapedIconToggleButton(
+                    modifier = Modifier
+                        .skipToLookaheadSize(),
                     checked = selected,
                     onCheckedChange = { onFavoriteClick() }
                 ) {
@@ -606,6 +620,8 @@ private fun NoteCard(
             },
             supportingContent = {
                 Text(
+                    modifier = Modifier
+                        .skipToLookaheadSize(),
                     text = note.timeStamp.convertToDateTime(),
                     style = MaterialTheme.typography.titleSmall
                 )
@@ -613,12 +629,6 @@ private fun NoteCard(
             bodyContent = {
                 Text(
                     modifier = Modifier
-                        .sharedBounds(
-                            sharedContentState = rememberSharedContentState(
-                                key = NoteSharedElementKey(note.id, SnackSharedElementType.Content)
-                            ),
-                            animatedVisibilityScope = animatedVisibilityScope
-                        )
                         .skipToLookaheadSize(),
                     text = note.content,
                     maxLines = 5,
