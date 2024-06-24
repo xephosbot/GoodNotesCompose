@@ -3,6 +3,7 @@ package com.xbot.goodnotes.navigation
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.navigation.rememberBottomSheetNavigator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -30,13 +31,15 @@ fun GoodNotesNavHost(
     val bottomSheetNavigator = rememberBottomSheetNavigator()
     val navController = rememberNavController(bottomSheetNavigator)
 
-    SharedTransitionLayout(
-        modifier = modifier.background(containerColor),
-    ) {
+    SharedTransitionLayout {
         ModalBottomSheetLayout(
             bottomSheetNavigator = bottomSheetNavigator
         ) {
+            //TODO: Update to type safe Navigation after bottom sheet M3 integration released
             NavHost(
+                modifier = modifier
+                    .fillMaxSize()
+                    .background(containerColor),
                 navController = navController,
                 startDestination = startDestination
             ) {
@@ -64,7 +67,7 @@ fun GoodNotesNavHost(
                 ) {
                     NoteDetailScreen(
                         onNavigateBack = {
-                            navController.popBackStack()
+                            navController.navigateUp()
                         }
                     )
                 }

@@ -36,10 +36,6 @@ fun AnimatedFloatingActionButton(
     visible: Boolean,
     content: @Composable () -> Unit
 ) {
-    // TODO: Delete this after Compose 1.7.0
-    @Suppress("NAME_SHADOWING")
-    val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
-
     AnimatedVisibility(
         visible = visible,
         enter = materialFadeIn(),

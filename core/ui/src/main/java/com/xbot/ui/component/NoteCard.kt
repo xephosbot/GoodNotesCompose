@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -23,8 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.text.style.Hyphens
-import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.xbot.ui.theme.adjustColorAtElevation
@@ -33,6 +30,7 @@ import com.xbot.ui.theme.adjustColorAtElevation
 @Composable
 fun NoteCard(
     modifier: Modifier = Modifier,
+    contentModifier: Modifier = Modifier,
     selected: Boolean = false,
     colors: NoteCardColors = NoteCardDefaults.noteCardColors(),
     border: NoteCardBorder = NoteCardDefaults.noteCardBorder(),
@@ -46,6 +44,7 @@ fun NoteCard(
 ) {
     NoteCardContent(
         modifier = modifier,
+        contentModifier = contentModifier,
         selected = selected,
         colors = colors,
         border = border,
@@ -63,6 +62,7 @@ fun NoteCard(
 @Composable
 private fun NoteCardContent(
     modifier: Modifier = Modifier,
+    contentModifier: Modifier = Modifier,
     selected: Boolean,
     colors: NoteCardColors,
     border: NoteCardBorder,
@@ -87,7 +87,7 @@ private fun NoteCardContent(
         border = border.borderStroke(selected).value
     ) {
         NoteCardLayout(
-            modifier = Modifier
+            modifier = contentModifier
                 .defaultMinSize(
                     minWidth = NoteCardDefaults.MinWidth,
                     minHeight = NoteCardDefaults.MinHeight
@@ -155,6 +155,8 @@ object NoteCardDefaults {
     val MinWidth = 120.dp
 
     val MinHeight = 100.dp
+
+    val ShapeCornerRadius = 48.dp
 
     val shape: Shape @Composable get() = MaterialTheme.shapes.extraLarge
 

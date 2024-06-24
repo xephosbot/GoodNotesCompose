@@ -66,10 +66,6 @@ fun SelectableChip(
     border: SelectableChipBorder = SelectableChipDefaults.selectableChipBorder(),
     interactionSource: MutableInteractionSource? = null
 ) {
-    // TODO: Delete this after Compose 1.7.0
-    @Suppress("NAME_SHADOWING")
-    val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
-
     Surface(
         modifier = modifier
             .semantics { role = Role.Button }
