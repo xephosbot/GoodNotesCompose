@@ -13,4 +13,6 @@ interface FolderRepository {
     suspend fun insertFolder(folder: FolderModel)
 
     suspend fun deleteFolder(folder: FolderModel)
+
+    fun updateFolder(folders: List<FolderModel>)
 }

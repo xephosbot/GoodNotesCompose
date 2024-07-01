@@ -10,13 +10,13 @@ internal fun NoteEntity.mapToDomainModel() =
     NoteModel(noteId, title, content, isFavorite, timeStamp, colorId)
 
 internal fun FolderEntity.mapToDomainModel() =
-    FolderModel(folderId, name)
+    FolderModel(folderId, name, order)
 
 internal fun NoteModel.mapToDataModel() =
     NoteEntity(id, title, content, isFavorite, timeStamp, colorId)
 
 internal fun FolderModel.mapToDataModel() =
-    FolderEntity(id, name)
+    FolderEntity(id, name, order)
 
 internal fun Int.toAppTheme() = when(this) {
     0 -> AppTheme.System

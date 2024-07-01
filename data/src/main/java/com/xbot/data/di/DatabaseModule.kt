@@ -17,18 +17,21 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase {
-        return if (BuildConfig.DEBUG) {
+        return if (!BuildConfig.DEBUG) {
             Room.databaseBuilder(
                 context,
                 AppDatabase::class.java,
                 AppDatabase.DATABASE_NAME
-            ).createFromAsset("database/goodnotes_debug.db").build()
+            )
+                .createFromAsset("database/goodnotes_debug.db")
+                .addMigrations(AppDatabase.MIGRATION_3_4)
+                .build()
         } else {
             Room.databaseBuilder(
                 context,
                 AppDatabase::class.java,
                 AppDatabase.DATABASE_NAME
-            ).build()
+            ).addMigrations(AppDatabase.MIGRATION_3_4).build()
         }
     }
 }

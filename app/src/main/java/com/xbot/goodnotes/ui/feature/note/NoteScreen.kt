@@ -19,20 +19,21 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -71,17 +72,24 @@ import com.xbot.goodnotes.navigation.NoteSharedElementKey
 import com.xbot.goodnotes.navigation.NoteSharedElementType
 import com.xbot.goodnotes.ui.plus
 import com.xbot.ui.component.AnimatedFloatingActionButton
+import com.xbot.ui.component.DraggableItem
+import com.xbot.ui.component.DropdownMenu
 import com.xbot.ui.component.FilledShapedIconButton
 import com.xbot.ui.component.LargeTopAppBarWithSelectionMode
 import com.xbot.ui.component.LazyVerticalStaggeredGridWithSelection
 import com.xbot.ui.component.NoteCard
 import com.xbot.ui.component.NoteCardDefaults
+import com.xbot.ui.component.ReorderableItemsState
 import com.xbot.ui.component.Scaffold
 import com.xbot.ui.component.SelectableChip
 import com.xbot.ui.component.SelectableChipBadge
 import com.xbot.ui.component.SelectableItemsState
+import com.xbot.ui.component.ShapedIconButton
 import com.xbot.ui.component.ShapedIconToggleButton
+import com.xbot.ui.component.dragContainer
 import com.xbot.ui.component.isScrollingUp
+import com.xbot.ui.component.rememberDragDropState
+import com.xbot.ui.component.rememberReorderableItemsState
 import com.xbot.ui.component.rememberSelectableItemsState
 import com.xbot.ui.icon.Icons
 import com.xbot.ui.theme.harmonized
@@ -118,12 +126,18 @@ private fun NoteScreenContent(
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val selectionState = rememberSelectableItemsState<Note>()
+    val reorderState = rememberReorderableItemsState(state.foldersList)
     val lazyGridState = rememberLazyStaggeredGridState()
     var showAddNewFolderDialog by remember { mutableStateOf(false) }
     var showChangeFolderBottomSheet by remember { mutableStateOf(false) }
 
-    BackHandler(enabled = selectionState.inSelectionMode) {
+    BackHandler(selectionState.inSelectionMode) {
         selectionState.clear()
+    }
+
+    BackHandler(reorderState.inReorderMode) {
+        onAction(NoteScreenAction.UpdateFolders(reorderState.list))
+        reorderState.setReorderMode(false)
     }
 
     Scaffold(
@@ -148,7 +162,7 @@ private fun NoteScreenContent(
                 scrollBehavior = scrollBehavior
             ) {
                 FolderLazyRow(
-                    items = state.foldersList,
+                    reorderState = reorderState,
                     noteCount = state.noteCount,
                     isFolderSelected = { it == state.currentFolderId },
                     onFolderClick = { folderId ->
@@ -159,6 +173,9 @@ private fun NoteScreenContent(
                     },
                     onDeleteFolderClick = { folder ->
                         onAction(NoteScreenAction.DeleteFolder(folder))
+                    },
+                    onRenameFolderClick = { folder ->
+                        //TODO: Folder rename dialog
                     }
                 )
                 Spacer(modifier = Modifier.height(12.dp))
@@ -283,15 +300,18 @@ fun NoteScreenTopAppBar(
                                 showDropDownMenu = false
                             }
                         ) {
-                            DropdownMenuItem(
-                                text = {
-                                    Text(text = stringResource(R.string.context_menu_add_note_to_folder))
-                                },
+                            //TODO: More options to choose
+                            ShapedIconButton(
                                 onClick = {
                                     onChangeFolderClick()
                                     showDropDownMenu = false
                                 }
-                            )
+                            ) {
+                                Icon(
+                                    imageVector = Icons.AddToFolder,
+                                    contentDescription = ""
+                                )
+                            }
                         }
                     }
                 }
@@ -314,81 +334,133 @@ fun NoteScreenTopAppBar(
 @Composable
 private fun FolderLazyRow(
     modifier: Modifier = Modifier,
-    items: List<Folder>,
+    reorderState: ReorderableItemsState<Folder>,
     noteCount: Int,
     isFolderSelected: (Long) -> Boolean,
     onFolderClick: (Long) -> Unit,
     onAddNewFolderClick: () -> Unit,
-    onDeleteFolderClick: (Folder) -> Unit
+    onDeleteFolderClick: (Folder) -> Unit,
+    onRenameFolderClick: (Folder) -> Unit
 ) {
     var currentFolderContextMenu by remember { mutableStateOf<Long?>(null) }
+    val listState = rememberLazyListState()
+    val dragDropState = rememberDragDropState(listState, reorderState) { fromIndex, toIndex ->
+        reorderState.swapItems(fromIndex, toIndex)
+    }
 
     LazyRow(
-        modifier = modifier,
+        modifier = modifier
+            .fillMaxWidth()
+            .dragContainer(dragDropState),
+        state = listState,
         contentPadding = PaddingValues(horizontal = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        item {
-            SelectableChip(
-                selected = isFolderSelected(Constants.DEFAULT_FOLDER_ID),
-                onClick = { onFolderClick(Constants.DEFAULT_FOLDER_ID) },
-                label = { Text(text = stringResource(R.string.folder_all_title)) },
-                leadingIcon = { SelectableChipBadge(text = noteCount.toString()) }
-            )
-        }
-
-        item {
-            SelectableChip(
-                selected = isFolderSelected(Constants.FAVORITE_FOLDER_ID),
-                onClick = { onFolderClick(Constants.FAVORITE_FOLDER_ID) },
-                label = { Text(text = stringResource(R.string.folder_favorite_title)) },
-                leadingIcon = { SelectableChipBadge(text = noteCount.toString()) }
-            )
-        }
-
-        items(
-            items = items,
-            key = { it.id }
-        ) { folder ->
-            Box {
+        if (!reorderState.inReorderMode) {
+            item(
+                key = Constants.DEFAULT_FOLDER_ID
+            ) {
                 SelectableChip(
-                    selected = isFolderSelected(folder.id),
-                    onClick = { onFolderClick(folder.id) },
-                    onLongClick = { currentFolderContextMenu = folder.id },
-                    label = { Text(text = folder.name) },
+                    modifier = Modifier.animateItem(),
+                    selected = isFolderSelected(Constants.DEFAULT_FOLDER_ID),
+                    onClick = { onFolderClick(Constants.DEFAULT_FOLDER_ID) },
+                    label = { Text(text = stringResource(R.string.folder_all_title)) },
                     leadingIcon = { SelectableChipBadge(text = noteCount.toString()) }
                 )
+            }
 
-                DropdownMenu(
-                    expanded = currentFolderContextMenu == folder.id,
-                    onDismissRequest = { currentFolderContextMenu = null }
-                ) {
-                    DropdownMenuItem(
-                        text = {
-                            Text(text = stringResource(R.string.context_menu_delete))
-                        },
-                        onClick = {
-                            onDeleteFolderClick(folder)
-                            currentFolderContextMenu = null
-                        }
+            item(
+                key = Constants.FAVORITE_FOLDER_ID
+            ) {
+                SelectableChip(
+                    modifier = Modifier.animateItem(),
+                    selected = isFolderSelected(Constants.FAVORITE_FOLDER_ID),
+                    onClick = { onFolderClick(Constants.FAVORITE_FOLDER_ID) },
+                    label = { Text(text = stringResource(R.string.folder_favorite_title)) },
+                    leadingIcon = { SelectableChipBadge(text = noteCount.toString()) }
+                )
+            }
+        }
+
+        itemsIndexed(
+            items = reorderState.list,
+            key = { _, item -> item.id }
+        ) { index, folder ->
+            DraggableItem(
+                dragDropState = dragDropState,
+                index = index
+            ) { isDragging ->
+                Box {
+                    SelectableChip(
+                        selected = isFolderSelected(folder.id) && !reorderState.inReorderMode,
+                        onClick = { onFolderClick(folder.id) },
+                        onLongClick = { currentFolderContextMenu = folder.id },
+                        label = { Text(text = folder.name) },
+                        leadingIcon = { SelectableChipBadge(text = noteCount.toString()) },
+                        enabled = !reorderState.inReorderMode
                     )
+
+                    DropdownMenu(
+                        expanded = currentFolderContextMenu == folder.id,
+                        onDismissRequest = { currentFolderContextMenu = null }
+                    ) {
+                        ShapedIconButton(
+                            onClick = {
+                                onDeleteFolderClick(folder)
+                                currentFolderContextMenu = null
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Delete,
+                                contentDescription = ""
+                            )
+                        }
+                        ShapedIconButton(
+                            onClick = {
+                                onRenameFolderClick(folder)
+                                currentFolderContextMenu = null
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Edit,
+                                contentDescription = ""
+                            )
+                        }
+                        ShapedIconButton(
+                            onClick = {
+                                reorderState.setReorderMode(true)
+                                currentFolderContextMenu = null
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Reorder,
+                                contentDescription = ""
+                            )
+                        }
+                    }
                 }
             }
         }
 
-        item {
-            FilledShapedIconButton(
-                onClick = onAddNewFolderClick,
-                size = 40.dp
+        if (!reorderState.inReorderMode) {
+            item(
+                key = Constants.NEW_NOTE_ID
             ) {
-                Icon(
-                    imageVector = Icons.Add,
-                    contentDescription = ""
-                )
+                FilledShapedIconButton(
+                    modifier = Modifier.animateItem(),
+                    onClick = onAddNewFolderClick,
+                    size = 40.dp
+                ) {
+                    Icon(
+                        imageVector = Icons.Add,
+                        contentDescription = ""
+                    )
+                }
             }
         }
     }
 }
+
 
 @Composable
 private fun AddNewFolderDialog(

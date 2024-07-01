@@ -9,6 +9,7 @@ import com.xbot.domain.usecase.folder.AddFolder
 import com.xbot.domain.usecase.folder.DeleteFolder
 import com.xbot.domain.usecase.folder.GetFolders
 import com.xbot.domain.usecase.folder.GetFoldersRelatedToNote
+import com.xbot.domain.usecase.folder.UpdateFolders
 import com.xbot.domain.usecase.note.AddNotes
 import com.xbot.domain.usecase.note.DeleteNotes
 import com.xbot.domain.usecase.note.GetNotes
@@ -47,6 +48,7 @@ class NoteViewModel @Inject constructor(
     private val updateNote: UpdateNote,
     private val deleteNotes: DeleteNotes,
     private val deleteFolder: DeleteFolder,
+    private val updateFolders: UpdateFolders,
     private val restoreNotes: RestoreNotes,
     private val snackbarManager: SnackbarManager
 ) : ViewModel() {
@@ -97,6 +99,12 @@ class NoteViewModel @Inject constructor(
             is NoteScreenAction.UpdateRelatedFolders -> updateRelatedFolders(action.notes)
 
             is NoteScreenAction.ChangeFolderForNotes -> changeFolderForNotes(action.notes, action.folder, action.value)
+
+            is NoteScreenAction.UpdateFolders -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    updateFolders(action.folders.map(Folder::mapToDomainModel))
+                }
+            }
         }
     }
 

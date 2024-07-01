@@ -4,6 +4,7 @@ import com.xbot.data.dao.FolderDao
 import com.xbot.data.mapToDataModel
 import com.xbot.data.mapToDomainModel
 import com.xbot.data.model.folder.FolderEntity
+import com.xbot.data.model.folder.FolderUpdate
 import com.xbot.data.model.note.NoteEntity
 import com.xbot.domain.model.FolderModel
 import com.xbot.domain.model.NoteModel
@@ -25,10 +26,18 @@ class FolderRepositoryImpl @Inject constructor(
     }
 
     override suspend fun insertFolder(folder: FolderModel) {
-        folderDao.insert(folder.mapToDataModel())
+        val order = folderDao.getMaxOrder() + 1
+        folderDao.insert(folder.copy(order = order).mapToDataModel())
     }
 
     override suspend fun deleteFolder(folder: FolderModel) {
         folderDao.delete(folder.mapToDataModel())
+    }
+
+    override fun updateFolder(folders: List<FolderModel>) {
+        val update = folders.mapIndexed { index, folder ->
+            FolderUpdate(folder.id, index)
+        }
+        folderDao.update(*update.toTypedArray())
     }
 }

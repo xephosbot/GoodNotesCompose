@@ -15,13 +15,13 @@ internal fun NoteModel.mapToUIModel() =
     Note(id, title, content, isFavorite, timeStamp, colorId)
 
 internal fun FolderModel.mapToUIModel() =
-    Folder(id, name)
+    Folder(id, name, order)
 
 internal fun Note.mapToDomainModel() =
     NoteModel(id, title, content, isFavorite, timeStamp, colorId)
 
 internal fun Folder.mapToDomainModel() =
-    FolderModel(id, name)
+    FolderModel(id, name, order)
 
 internal fun AppTheme.toInt() = when (this) {
     is AppTheme.System -> 0

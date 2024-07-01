@@ -22,4 +22,5 @@ sealed interface NoteScreenAction {
     data class DeleteFolder(val folder: Folder) : NoteScreenAction
     data class UpdateRelatedFolders(val notes: List<Note>) : NoteScreenAction
     data class ChangeFolderForNotes(val notes: List<Note>, val folder: Folder, val value: Boolean) : NoteScreenAction
+    data class UpdateFolders(val folders: List<Folder>) : NoteScreenAction
 }
