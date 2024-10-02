@@ -1,3 +1,5 @@
+@file:Suppress("UnstableApiUsage")
+
 plugins {
     alias(libs.plugins.xbot.android.application)
     alias(libs.plugins.xbot.android.application.compose)

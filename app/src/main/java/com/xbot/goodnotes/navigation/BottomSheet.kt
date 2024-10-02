@@ -9,7 +9,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.navigation.BottomSheetNavigator
+import androidx.compose.material.navigation.BottomSheetNavigatorDestinationBuilder
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.navigation.ModalBottomSheetLayout
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -23,11 +26,14 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastForEach
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDeepLink
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavType
 import androidx.navigation.get
+import kotlin.reflect.KType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,25 +67,44 @@ fun NavGraphBuilder.bottomSheet(
     deepLinks: List<NavDeepLink> = emptyList(),
     content: @Composable ColumnScope.(backstackEntry: NavBackStackEntry) -> Unit
 ) {
-    addDestination(
-        BottomSheetNavigator.Destination(
+    destination(
+        BottomSheetNavigatorDestinationBuilder(
             navigator = provider[BottomSheetNavigator::class],
+            route = route,
             content = { BottomSheet { content(it) } }
         ).apply {
-            this.route = route
-            arguments.forEach { (argumentName, argument) ->
-                addArgument(argumentName, argument)
+            arguments.fastForEach { (argumentName, argument) ->
+                argument(argumentName, argument)
             }
-            deepLinks.forEach { deepLink ->
-                addDeepLink(deepLink)
+            deepLinks.fastForEach { deepLink -> deepLink(deepLink) }
+        }
+    )
+}
+
+inline fun <reified T : Any> NavGraphBuilder.bottomSheet(
+    typeMap: Map<KType, @JvmSuppressWildcards NavType<*>> = emptyMap(),
+    arguments: List<NamedNavArgument> = emptyList(),
+    deepLinks: List<NavDeepLink> = emptyList(),
+    crossinline content: @Composable ColumnScope.(backstackEntry: NavBackStackEntry) -> Unit
+) {
+    destination(
+        BottomSheetNavigatorDestinationBuilder(
+            navigator = provider[BottomSheetNavigator::class],
+            route = T::class,
+            typeMap = typeMap,
+            content = { BottomSheet { content(it) } }
+        ).apply {
+            arguments.fastForEach { (argumentName, argument) ->
+                argument(argumentName, argument)
             }
+            deepLinks.fastForEach { deepLink -> deepLink(deepLink) }
         }
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun BottomSheet(
+fun BottomSheet(
     modifier: Modifier = Modifier,
     sheetMaxWidth: Dp = BottomSheetDefaults.SheetMaxWidth,
     shape: Shape = BottomSheetDefaults.ExpandedShape,

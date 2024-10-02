@@ -14,9 +14,11 @@ import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDeepLink
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import com.xbot.ui.animation.materialSharedAxisZIn
 import com.xbot.ui.animation.materialSharedAxisZOut
+import kotlin.reflect.KType
 
 @ExperimentalSharedTransitionApi
 fun NavGraphBuilder.sharedElementComposable(
@@ -31,6 +33,29 @@ fun NavGraphBuilder.sharedElementComposable(
     content: @Composable AnimatedContentScope.(NavBackStackEntry) -> Unit
 ) {
     composable(route, arguments, deepLinks, enterTransition, exitTransition, popEnterTransition, popExitTransition) {
+        CompositionLocalProvider(
+            LocalSharedElementScopes provides SharedElementScopes(
+                sharedTransitionScope = sharedTransitionScope,
+                animatedVisibilityScope = this@composable
+            )
+        ) {
+            content(it)
+        }
+    }
+}
+
+@ExperimentalSharedTransitionApi
+inline fun <reified T : Any> NavGraphBuilder.sharedElementComposable(
+    sharedTransitionScope: SharedTransitionScope,
+    typeMap: Map<KType, @JvmSuppressWildcards NavType<*>> = emptyMap(),
+    deepLinks: List<NavDeepLink> = emptyList(),
+    noinline enterTransition: (@JvmSuppressWildcards AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition?)? = { materialSharedAxisZIn(forward = true) },
+    noinline exitTransition: (@JvmSuppressWildcards AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition?)? = { materialSharedAxisZOut(forward = true) },
+    noinline popEnterTransition: (@JvmSuppressWildcards AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition?)? = { materialSharedAxisZIn(forward = false) },
+    noinline popExitTransition: (@JvmSuppressWildcards AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition?)? = { materialSharedAxisZOut(forward = false) },
+    noinline content: @Composable AnimatedContentScope.(NavBackStackEntry) -> Unit
+) {
+    composable<T>(typeMap, deepLinks, enterTransition, exitTransition, popEnterTransition, popExitTransition) {
         CompositionLocalProvider(
             LocalSharedElementScopes provides SharedElementScopes(
                 sharedTransitionScope = sharedTransitionScope,

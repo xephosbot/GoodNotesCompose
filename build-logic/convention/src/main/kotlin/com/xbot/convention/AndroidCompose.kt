@@ -1,3 +1,5 @@
+@file:Suppress("UnstableApiUsage")
+
 package com.xbot.convention
 
 import com.android.build.api.dsl.CommonExtension
@@ -17,17 +19,13 @@ internal fun Project.configureAndroidCompose(
             compose = true
         }
 
-        composeOptions {
-            kotlinCompilerExtensionVersion = libs.findVersion("androidxComposeCompiler").get().toString()
-        }
-
         dependencies {
-            //val bom = libs.findLibrary("androidx-compose-bom").get()
-            //add("implementation", platform(bom))
-            //add("androidTestImplementation", platform(bom))
+            val bom = libs.findLibrary("androidx-compose-bom").get()
+            add("implementation", platform(bom))
+            add("androidTestImplementation", platform(bom))
 
-            val bomAlpha = libs.findLibrary("androidx-compose-bom-alpha").get()
-            add("api", platform(bomAlpha))
+            //val bomAlpha = libs.findLibrary("androidx-compose-bom-alpha").get()
+            //add("api", platform(bomAlpha))
 
             val immutableCollections = libs.findLibrary("kotlinx-collections-immutable").get()
             add("implementation", immutableCollections)
@@ -42,8 +40,8 @@ internal fun Project.configureAndroidCompose(
     }
 
     tasks.withType<KotlinCompile>().configureEach {
-        kotlinOptions {
-            freeCompilerArgs = freeCompilerArgs + buildComposeMetricsParameters()
+        compilerOptions {
+            freeCompilerArgs.addAll(buildComposeMetricsParameters())
         }
     }
 }
