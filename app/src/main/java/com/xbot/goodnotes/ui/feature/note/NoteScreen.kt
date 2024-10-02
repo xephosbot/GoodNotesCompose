@@ -702,7 +702,8 @@ private fun NoteCard(
                     modifier = Modifier
                         .skipToLookaheadSize(),
                     text = note.timeStamp.convertToDateTime(),
-                    style = MaterialTheme.typography.titleSmall
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             },
             bodyContent = {
@@ -712,7 +713,8 @@ private fun NoteCard(
                     text = note.content,
                     maxLines = 5,
                     overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             },
             onClick = { onClick() },
