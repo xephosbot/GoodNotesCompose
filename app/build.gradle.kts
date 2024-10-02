@@ -54,10 +54,6 @@ android {
             excludes.add("/META-INF/{AL2.0,LGPL2.1}")
         }
     }
-
-    baselineProfile {
-        automaticGenerationDuringBuild = true
-    }
 }
 
 dependencies {

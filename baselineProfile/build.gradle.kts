@@ -1,3 +1,5 @@
+@file:Suppress("UnstableApiUsage")
+
 plugins {
     alias(libs.plugins.xbot.android.test)
     alias(libs.plugins.baselineprofile)
@@ -16,6 +18,8 @@ android {
 
 }
 
+// This is the configuration block for the Baseline Profile plugin.
+// You can specify to run the generators on a managed devices or connected devices.
 baselineProfile {
     useConnectedDevices = true
 }
@@ -29,9 +33,10 @@ dependencies {
 
 androidComponents {
     onVariants { v ->
+        val artifactsLoader = v.artifacts.getBuiltArtifactsLoader()
         v.instrumentationRunnerArguments.put(
             "targetAppId",
-            v.testedApks.map { v.artifacts.getBuiltArtifactsLoader().load(it)?.applicationId }
+            v.testedApks.map { artifactsLoader.load(it)?.applicationId!! }
         )
     }
 }

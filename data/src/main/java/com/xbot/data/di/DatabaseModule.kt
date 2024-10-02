@@ -16,22 +16,21 @@ import javax.inject.Singleton
 object DatabaseModule {
     @Provides
     @Singleton
-    fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase {
-        return if (!BuildConfig.DEBUG) {
-            Room.databaseBuilder(
-                context,
-                AppDatabase::class.java,
-                AppDatabase.DATABASE_NAME
-            )
-                .createFromAsset("database/goodnotes_debug.db")
-                .addMigrations(AppDatabase.MIGRATION_3_4)
-                .build()
-        } else {
-            Room.databaseBuilder(
-                context,
-                AppDatabase::class.java,
-                AppDatabase.DATABASE_NAME
-            ).addMigrations(AppDatabase.MIGRATION_3_4).build()
-        }
+    fun provideAppDatabase(@ApplicationContext context: Context) = when (BuildConfig.DEBUG) {
+        true -> Room.databaseBuilder(
+            context,
+            AppDatabase::class.java,
+            AppDatabase.DATABASE_NAME
+        )
+            .createFromAsset("database/goodnotes_debug.db")
+            .addMigrations(AppDatabase.MIGRATION_3_4)
+            .build()
+        else -> Room.databaseBuilder(
+            context,
+            AppDatabase::class.java,
+            AppDatabase.DATABASE_NAME
+        )
+            .addMigrations(AppDatabase.MIGRATION_3_4)
+            .build()
     }
 }
