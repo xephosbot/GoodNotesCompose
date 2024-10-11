@@ -17,7 +17,7 @@ class SettingsDataSource @Inject constructor(
     }
 
     val useDynamicTheme: Flow<Boolean> = dataStore.data.map { settings ->
-        settings[USE_DYNAMIC_THEME] ?: true
+        settings[USE_DYNAMIC_THEME] != false
     }
 
     suspend fun changeAppTheme(theme: Int) {

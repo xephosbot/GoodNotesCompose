@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.xbot.android.application)
     alias(libs.plugins.xbot.android.application.compose)
     alias(libs.plugins.xbot.android.hilt)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.baselineprofile)
 }
 
@@ -66,6 +67,8 @@ dependencies {
 
     // Kotlin dependencies
     implementation(libs.kotlinx.datetime)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.collections.immutable)
 
     // AndroidX dependencies
     implementation(libs.androidx.activity.compose)
