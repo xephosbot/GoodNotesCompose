@@ -9,7 +9,7 @@ class AddNote @Inject constructor(
     private val repository: NoteRepository
 ) {
     suspend operator fun invoke(note: NoteModel, folderId: Long = Constants.DEFAULT_FOLDER_ID) {
-        if (note.title.isNotBlank() && note.content.isNotBlank()) {
+        if (note.title.isNotBlank() || note.content.isNotBlank()) {
             repository.insertNote(note, folderId)
         }
     }

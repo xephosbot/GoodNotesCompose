@@ -16,18 +16,18 @@ object DaosModule {
     @Provides
     @Singleton
     fun provideNoteDao(appDatabase: AppDatabase): NoteDao {
-        return appDatabase.noteDao
+        return appDatabase.getNoteDao()
     }
 
     @Provides
     @Singleton
     fun provideFolderDao(appDatabase: AppDatabase): FolderDao {
-        return appDatabase.folderDao
+        return appDatabase.getFolderDao()
     }
 
     @Provides
     @Singleton
     fun provideNoteFolderCrossRefDao(appDatabase: AppDatabase): NoteFolderCrossRefDao {
-        return appDatabase.noteFolderCrossRefDao
+        return appDatabase.getNoteFolderCrossRefDao()
     }
 }

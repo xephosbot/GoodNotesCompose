@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.xbot.android.application.compose)
     alias(libs.plugins.xbot.android.hilt)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.baselineprofile)
 }
 
@@ -87,6 +88,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
 
     // Testing dependencies
+    testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.espresso.core)
     androidTestImplementation(libs.androidx.test.ext)
     androidTestImplementation(libs.androidx.compose.ui.test)

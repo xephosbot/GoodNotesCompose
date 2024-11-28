@@ -18,9 +18,9 @@ import com.xbot.data.dao.NoteFolderCrossRefDao
     exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
-    abstract val noteDao: NoteDao
-    abstract val folderDao: FolderDao
-    abstract val noteFolderCrossRefDao: NoteFolderCrossRefDao
+    abstract fun getNoteDao(): NoteDao
+    abstract fun getFolderDao(): FolderDao
+    abstract fun getNoteFolderCrossRefDao(): NoteFolderCrossRefDao
 
     companion object {
         const val DATABASE_NAME = "notes-db"

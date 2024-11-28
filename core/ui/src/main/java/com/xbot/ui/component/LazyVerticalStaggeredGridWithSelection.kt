@@ -19,7 +19,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.launch
 
 @ExperimentalFoundationApi
@@ -29,7 +28,7 @@ fun <T, K> LazyVerticalStaggeredGridWithSelection(
     modifier: Modifier = Modifier,
     state: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
     selectionState: SelectableItemsState<T> = rememberSelectableItemsState(),
-    items: ImmutableList<T>,
+    items: List<T>,
     key: ((item: T) -> Any)? = null,
     refreshKey: K,
     contentPadding: PaddingValues = PaddingValues(0.dp),

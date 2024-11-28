@@ -11,9 +11,6 @@ import androidx.compose.ui.layout.SubcomposeMeasureScope
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.util.fastMap
 import androidx.compose.ui.util.fastMapIndexed
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toImmutableList
 
 /**
  * SubcomposeLayout that [SubcomposeMeasureScope.subcompose] [contents]
@@ -32,8 +29,8 @@ import kotlinx.collections.immutable.toImmutableList
 @Composable
 internal fun DimensionSubcomposeLayout(
     modifier: Modifier = Modifier,
-    contents: ImmutableList<@Composable @UiComposable () -> Unit>,
-    dependentContent: @Composable (ImmutableList<Size>) -> Unit
+    contents: List<@Composable @UiComposable () -> Unit>,
+    dependentContent: @Composable (List<Size>) -> Unit
 ) {
     SubcomposeLayout(
         modifier = modifier
@@ -47,9 +44,9 @@ internal fun DimensionSubcomposeLayout(
         }
 
         val dependentContentsSize = if (contents.isEmpty()) {
-            persistentListOf()
+            listOf()
         } else {
-            mainPlaceables.fastMap { Size(it.width.toFloat(), it.height.toFloat()) }.toImmutableList()
+            mainPlaceables.fastMap { Size(it.width.toFloat(), it.height.toFloat()) }
         }
 
         val dependentPlaceable: Placeable = subcompose(Slots.Dependent) {

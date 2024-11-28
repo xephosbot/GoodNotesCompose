@@ -54,7 +54,6 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
-import kotlinx.collections.immutable.persistentListOf
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.roundToInt
@@ -148,7 +147,7 @@ private fun LargeTopAppBarContent(
     }
 
     DimensionSubcomposeLayout(
-        contents = persistentListOf(titleStyled, collapsedTitleStyled)
+        contents = listOf(titleStyled, collapsedTitleStyled)
     ) { (titleSize, collapsedTitleSize) ->
 
         val additionalHeightPx = titleSize.height - collapsedTitleSize.height
