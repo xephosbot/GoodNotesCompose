@@ -17,9 +17,7 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material3.InTransitionDuration
 import androidx.compose.material3.MenuDefaults
-import androidx.compose.material3.OutTransitionDuration
 import androidx.compose.material3.Surface
 import androidx.compose.material3.calculateTransformOrigin
 import androidx.compose.material3.internal.DropdownMenuPositionProvider
@@ -112,14 +110,14 @@ private fun DropdownMenuContent(
             if (false isTransitioningTo true) {
                 // Dismissed to expanded
                 tween(
-                    durationMillis = InTransitionDuration,
+                    durationMillis = 300,
                     easing = LinearOutSlowInEasing
                 )
             } else {
                 // Expanded to dismissed.
                 tween(
                     durationMillis = 1,
-                    delayMillis = OutTransitionDuration - 1
+                    delayMillis = 200 - 1
                 )
             }
         }, label = "scale transition"
@@ -134,7 +132,7 @@ private fun DropdownMenuContent(
                 tween(durationMillis = 30)
             } else {
                 // Expanded to dismissed.
-                tween(durationMillis = OutTransitionDuration)
+                tween(durationMillis = 300)
             }
         }, label = "alpha transition"
     ) { expanded ->
