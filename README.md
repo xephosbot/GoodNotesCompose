@@ -30,9 +30,9 @@ The project adheres to clean architecture principles, dividing the codebase into
 
 ## Prerequisites
 
-- **Android Studio 2024.1.2** or newer.
-- **JDK 17** or newer.
-- **Gradle 8.9** or newer.
+- **Android Studio 2025.1.2** or newer.
+- **JDK 21** or newer.
+- **Gradle 8.13** or newer.
 
 ## License
 
