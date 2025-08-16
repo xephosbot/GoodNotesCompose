@@ -102,7 +102,6 @@ fun NoteDetailScreenContent(
                     targetShapeCornerRadius = NoteCardDefaults.ShapeCornerRadius,
                     restingShapeCornerRadius = 0.dp,
                 ),
-            contentModifier = Modifier,
             topBar = {
                 NoteDetailScreenAppBar(
                     isFavorite = state.noteIsFavorite,
