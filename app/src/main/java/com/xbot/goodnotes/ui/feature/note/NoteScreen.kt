@@ -1,13 +1,8 @@
 package com.xbot.goodnotes.ui.feature.note
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.EnterExitState
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.animation.core.animateDp
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -31,7 +26,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -62,14 +56,15 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import com.xbot.common.Constants
 import com.xbot.goodnotes.R
 import com.xbot.goodnotes.convertToDateTime
 import com.xbot.goodnotes.model.Folder
 import com.xbot.goodnotes.model.Note
-import com.xbot.goodnotes.navigation.LocalSharedElementScopes
+import com.xbot.goodnotes.navigation.LocalNavSharedElementScope
 import com.xbot.goodnotes.navigation.NoteSharedElementKey
-import com.xbot.goodnotes.navigation.NoteSharedElementType
+import com.xbot.goodnotes.navigation.sharedBoundsRevealWithShapeMorph
 import com.xbot.goodnotes.ui.plus
 import com.xbot.ui.component.AnimatedFloatingActionButton
 import com.xbot.ui.component.DraggableItem
@@ -114,7 +109,8 @@ fun NoteScreen(
 
 @OptIn(
     ExperimentalMaterial3Api::class,
-    ExperimentalAnimationApi::class
+    ExperimentalAnimationApi::class,
+    ExperimentalSharedTransitionApi::class
 )
 @Composable
 private fun NoteScreenContent(
@@ -140,74 +136,87 @@ private fun NoteScreenContent(
         reorderState.setReorderMode(false)
     }
 
-    Scaffold(
-        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = {
-            NoteScreenTopAppBar(
-                selectionState = selectionState,
-                onSettingsClick = {
-                    navigateToSettings()
-                },
-                onDeleteClick = {
-                    onAction(NoteScreenAction.DeleteNotes(selectionState.selectedItems))
-                    selectionState.clear()
-                },
-                onChangeFolderClick = {
-                    onAction(NoteScreenAction.UpdateRelatedFolders(selectionState.selectedItems))
-                    if (state.foldersList.isNotEmpty()) showChangeFolderBottomSheet = true
-                },
-                onClearClick = {
-                    selectionState.clear()
-                },
-                scrollBehavior = scrollBehavior
-            ) {
-                FolderLazyRow(
-                    reorderState = reorderState,
-                    noteCount = state.noteCount,
-                    isFolderSelected = { it == state.currentFolderId },
-                    onFolderClick = { folderId ->
-                        onAction(NoteScreenAction.OpenFolder(folderId))
+    val sharedTransitionScope = LocalNavSharedElementScope.current
+    val animatedVisibilityScope = LocalNavAnimatedContentScope.current
+
+    with(sharedTransitionScope) {
+        Scaffold(
+            modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+            topBar = {
+                NoteScreenTopAppBar(
+                    selectionState = selectionState,
+                    onSettingsClick = {
+                        navigateToSettings()
                     },
-                    onAddNewFolderClick = {
-                        showAddNewFolderDialog = true
+                    onDeleteClick = {
+                        onAction(NoteScreenAction.DeleteNotes(selectionState.selectedItems))
+                        selectionState.clear()
                     },
-                    onDeleteFolderClick = { folder ->
-                        onAction(NoteScreenAction.DeleteFolder(folder))
+                    onChangeFolderClick = {
+                        onAction(NoteScreenAction.UpdateRelatedFolders(selectionState.selectedItems))
+                        if (state.foldersList.isNotEmpty()) showChangeFolderBottomSheet = true
                     },
-                    onRenameFolderClick = { folder ->
-                        //TODO: Folder rename dialog
-                    }
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-            }
-        },
-        floatingActionButton = {
-            AnimatedFloatingActionButton(
-                onClick = { navigateToDetails(Constants.NEW_NOTE_ID) },
-                visible = lazyGridState.isScrollingUp().value && !selectionState.inSelectionMode
-            ) {
-                Icon(
-                    imageVector = Icons.Add,
-                    contentDescription = ""
-                )
-            }
-        }
-    ) { innerPadding ->
-        NoteLazyGrid(
-            state = lazyGridState,
-            selectionState = selectionState,
-            items = state.notesList,
-            refreshKey = state.currentFolderId,
-            contentPadding = innerPadding + PaddingValues(horizontal = 4.dp),
-            onCLickNoteCard = { note ->
-                navigateToDetails(note.id)
+                    onClearClick = {
+                        selectionState.clear()
+                    },
+                    scrollBehavior = scrollBehavior
+                ) {
+                    FolderLazyRow(
+                        reorderState = reorderState,
+                        noteCount = state.noteCount,
+                        isFolderSelected = { it == state.currentFolderId },
+                        onFolderClick = { folderId ->
+                            onAction(NoteScreenAction.OpenFolder(folderId))
+                        },
+                        onAddNewFolderClick = {
+                            showAddNewFolderDialog = true
+                        },
+                        onDeleteFolderClick = { folder ->
+                            onAction(NoteScreenAction.DeleteFolder(folder))
+                        },
+                        onRenameFolderClick = { folder ->
+                            //TODO: Folder rename dialog
+                        }
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
             },
-            onFavoriteClick = { note ->
-                onAction(NoteScreenAction.UpdateNote(note, !note.isFavorite))
+            floatingActionButton = {
+                AnimatedFloatingActionButton(
+                    modifier = Modifier
+                        .sharedBoundsRevealWithShapeMorph(
+                            sharedContentState = rememberSharedContentState(NoteSharedElementKey(Constants.NEW_NOTE_ID)),
+                            animatedVisibilityScope = animatedVisibilityScope,
+                            targetShapeCornerRadius = 0.dp,
+                            restingShapeCornerRadius = NoteCardDefaults.ShapeCornerRadius,
+                            keepChildrenSizePlacement = false,
+                        ),
+                    onClick = { navigateToDetails(Constants.NEW_NOTE_ID) },
+                    visible = lazyGridState.isScrollingUp().value && !selectionState.inSelectionMode
+                ) {
+                    Icon(
+                        imageVector = Icons.Add,
+                        contentDescription = ""
+                    )
+                }
             }
-        )
-        if (state.notesList.isEmpty()) {
-            EmptyScreenPlaceHolder()
+        ) { innerPadding ->
+            NoteLazyGrid(
+                state = lazyGridState,
+                selectionState = selectionState,
+                items = state.notesList,
+                refreshKey = state.currentFolderId,
+                contentPadding = innerPadding + PaddingValues(horizontal = 4.dp),
+                onCLickNoteCard = { note ->
+                    navigateToDetails(note.id)
+                },
+                onFavoriteClick = { note ->
+                    onAction(NoteScreenAction.UpdateNote(note, !note.isFavorite))
+                }
+            )
+            if (state.notesList.isEmpty()) {
+                EmptyScreenPlaceHolder()
+            }
         }
     }
 
@@ -631,36 +640,18 @@ private fun NoteCard(
     onLongClick: () -> Unit,
     onFavoriteClick: () -> Unit
 ) {
-    val sharedTransitionScope = LocalSharedElementScopes.current.sharedTransitionScope
-        ?: throw IllegalArgumentException("No Scope found")
-    val animatedVisibilityScope = LocalSharedElementScopes.current.animatedVisibilityScope
-        ?: throw IllegalArgumentException("No Scope found")
-
-    val roundedCorner by animatedVisibilityScope.transition.animateDp(label = "Rounded corner") {
-        if (it == EnterExitState.Visible) NoteCardDefaults.ShapeCornerRadius else 0.dp
-    }
+    val sharedTransitionScope = LocalNavSharedElementScope.current
+    val animatedVisibilityScope = LocalNavAnimatedContentScope.current
 
     with(sharedTransitionScope) {
         NoteCard(
             modifier = modifier
-                .sharedBounds(
-                    sharedContentState = rememberSharedContentState(
-                        key = NoteSharedElementKey(note.id, NoteSharedElementType.Bounds)
-                    ),
+                .sharedBoundsRevealWithShapeMorph(
+                    sharedContentState = rememberSharedContentState(NoteSharedElementKey(note.id)),
                     animatedVisibilityScope = animatedVisibilityScope,
-                    enter = EnterTransition.None,
-                    exit = ExitTransition.None,
-                    resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
-                    clipInOverlayDuringTransition = OverlayClip(RoundedCornerShape(roundedCorner))
-                ),
-            contentModifier = Modifier
-                .sharedBounds(
-                    sharedContentState = rememberSharedContentState(
-                        key = NoteSharedElementKey(note.id, NoteSharedElementType.Content)
-                    ),
-                    animatedVisibilityScope = animatedVisibilityScope,
-                    resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
-                    clipInOverlayDuringTransition = OverlayClip(RoundedCornerShape(roundedCorner))
+                    targetShapeCornerRadius = 0.dp,
+                    restingShapeCornerRadius = NoteCardDefaults.ShapeCornerRadius,
+                    keepChildrenSizePlacement = false,
                 ),
             selected = selected,
             colors = NoteCardDefaults.noteCardColors(

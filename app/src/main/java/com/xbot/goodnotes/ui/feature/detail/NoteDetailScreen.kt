@@ -1,11 +1,6 @@
 package com.xbot.goodnotes.ui.feature.detail
 
-import androidx.compose.animation.EnterExitState
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.animation.core.animateDp
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
@@ -22,12 +17,12 @@ import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.BottomAppBarDefaults
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -43,7 +38,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
@@ -51,10 +45,11 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import com.xbot.goodnotes.R
-import com.xbot.goodnotes.navigation.LocalSharedElementScopes
+import com.xbot.goodnotes.navigation.LocalNavSharedElementScope
 import com.xbot.goodnotes.navigation.NoteSharedElementKey
-import com.xbot.goodnotes.navigation.NoteSharedElementType
+import com.xbot.goodnotes.navigation.sharedBoundsRevealWithShapeMorph
 import com.xbot.goodnotes.ui.plus
 import com.xbot.ui.component.NoteCardDefaults
 import com.xbot.ui.component.Scaffold
@@ -95,37 +90,19 @@ fun NoteDetailScreenContent(
 ) {
     var showColorPickerBottomSheet by remember { mutableStateOf(false) }
 
-    val sharedTransitionScope = LocalSharedElementScopes.current.sharedTransitionScope
-        ?: throw IllegalArgumentException("No Scope found")
-    val animatedVisibilityScope = LocalSharedElementScopes.current.animatedVisibilityScope
-        ?: throw IllegalArgumentException("No Scope found")
-
-    val roundedCorner by animatedVisibilityScope.transition.animateDp(label = "Rounded corner") {
-        if (it != EnterExitState.Visible) NoteCardDefaults.ShapeCornerRadius else 0.dp
-    }
+    val sharedTransitionScope = LocalNavSharedElementScope.current
+    val animatedVisibilityScope = LocalNavAnimatedContentScope.current
 
     with(sharedTransitionScope) {
         Scaffold(
             modifier = modifier
-                .sharedBounds(
-                    sharedContentState = rememberSharedContentState(
-                        key = NoteSharedElementKey(state.noteId, NoteSharedElementType.Bounds)
-                    ),
+                .sharedBoundsRevealWithShapeMorph(
+                    sharedContentState = rememberSharedContentState(NoteSharedElementKey(state.noteId)),
                     animatedVisibilityScope = animatedVisibilityScope,
-                    enter = EnterTransition.None,
-                    exit = ExitTransition.None,
-                    resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
-                    clipInOverlayDuringTransition = OverlayClip(RoundedCornerShape(roundedCorner))
-                )
-                .clip(RoundedCornerShape(roundedCorner)),
-            contentModifier = Modifier
-                .sharedBounds(
-                    sharedContentState = rememberSharedContentState(
-                        key = NoteSharedElementKey(state.noteId, NoteSharedElementType.Content)
-                    ),
-                    animatedVisibilityScope = animatedVisibilityScope,
-                    clipInOverlayDuringTransition = OverlayClip(RoundedCornerShape(roundedCorner)),
+                    targetShapeCornerRadius = NoteCardDefaults.ShapeCornerRadius,
+                    restingShapeCornerRadius = 0.dp,
                 ),
+            contentModifier = Modifier,
             topBar = {
                 NoteDetailScreenAppBar(
                     isFavorite = state.noteIsFavorite,
