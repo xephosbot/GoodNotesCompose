@@ -10,6 +10,10 @@ import com.xbot.domain.usecase.note.GetNote
 import com.xbot.domain.usecase.note.UpdateNote
 import com.xbot.goodnotes.mapToDomainModel
 import com.xbot.goodnotes.model.Note
+import com.xbot.goodnotes.navigation.NoteDetail
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,18 +21,21 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
 import javax.inject.Inject
+import kotlin.time.ExperimentalTime
 
-@HiltViewModel
-class NoteDetailViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
+@HiltViewModel(assistedFactory = NoteDetailViewModel.Factory::class)
+class NoteDetailViewModel @AssistedInject constructor(
+    @Assisted navKey: NoteDetail,
     private val getNote: GetNote,
     private val updateNote: UpdateNote,
     private val addNote: AddNote
 ) : ViewModel() {
 
-    private val noteId: Long = checkNotNull(savedStateHandle["noteId"])
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: NoteDetail): NoteDetailViewModel
+    }
 
     val titleTextFieldState: TextFieldState = TextFieldState()
     val contentTextFieldState: TextFieldState = TextFieldState()
@@ -38,7 +45,7 @@ class NoteDetailViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            val note = getNote(noteId)
+            val note = getNote(navKey.noteId)
             if (note != null) {
                 titleTextFieldState.edit { replace(0, length, note.title) }
                 contentTextFieldState.edit { replace(0, length, note.content) }
@@ -57,6 +64,7 @@ class NoteDetailViewModel @Inject constructor(
         }
     }
 
+    @OptIn(ExperimentalTime::class)
     fun onAction(action: NoteDetailScreenAction) {
         when (action) {
             is NoteDetailScreenAction.UpdateNote -> {
@@ -82,7 +90,7 @@ class NoteDetailViewModel @Inject constructor(
                 }
 
                 val timestamp = when (changeTimeStamp) {
-                    true -> Clock.System.now().toEpochMilliseconds() / 1000
+                    true -> kotlin.time.Clock.System.now().toEpochMilliseconds() / 1000
                     else -> state.value.noteTimestamp
                 }
 

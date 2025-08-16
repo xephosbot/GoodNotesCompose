@@ -1,14 +1,15 @@
 package com.xbot.goodnotes.ui.feature.detail
 
 import com.xbot.common.Constants
-import kotlinx.datetime.Clock
+import kotlin.time.ExperimentalTime
 
+@OptIn(ExperimentalTime::class)
 data class NoteDetailScreenState(
     val noteId: Long = Constants.NEW_NOTE_ID,
     val noteTitle: String = "",
     val noteText: String = "",
     val noteIsFavorite: Boolean = false,
-    val noteTimestamp: Long = Clock.System.now().toEpochMilliseconds() / 1000,
+    val noteTimestamp: Long = kotlin.time.Clock.System.now().toEpochMilliseconds() / 1000,
     val noteColorId: Int = 0,
 )
 
