@@ -30,7 +30,6 @@ import com.xbot.ui.theme.adjustColorAtElevation
 @Composable
 fun NoteCard(
     modifier: Modifier = Modifier,
-    contentModifier: Modifier = Modifier,
     selected: Boolean = false,
     colors: NoteCardColors = NoteCardDefaults.noteCardColors(),
     border: NoteCardBorder = NoteCardDefaults.noteCardBorder(),
@@ -44,7 +43,6 @@ fun NoteCard(
 ) {
     NoteCardContent(
         modifier = modifier,
-        contentModifier = contentModifier,
         selected = selected,
         colors = colors,
         border = border,
@@ -62,7 +60,6 @@ fun NoteCard(
 @Composable
 private fun NoteCardContent(
     modifier: Modifier = Modifier,
-    contentModifier: Modifier = Modifier,
     selected: Boolean,
     colors: NoteCardColors,
     border: NoteCardBorder,
@@ -87,7 +84,7 @@ private fun NoteCardContent(
         border = border.borderStroke(selected).value
     ) {
         NoteCardLayout(
-            modifier = contentModifier
+            modifier = Modifier
                 .defaultMinSize(
                     minWidth = NoteCardDefaults.MinWidth,
                     minHeight = NoteCardDefaults.MinHeight
