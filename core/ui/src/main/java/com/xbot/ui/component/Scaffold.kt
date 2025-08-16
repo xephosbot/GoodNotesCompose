@@ -47,7 +47,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun Scaffold(
     modifier: Modifier = Modifier,
-    contentModifier: Modifier = Modifier,
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     topBar: @Composable () -> Unit = {},
     bottomBar: @Composable () -> Unit = {},
@@ -64,7 +63,7 @@ fun Scaffold(
         contentColor = contentColor
     ) {
         ScaffoldLayout(
-            modifier = contentModifier.windowInsetsPadding(
+            modifier = Modifier.windowInsetsPadding(
                 WindowInsets.systemBars.union(WindowInsets.displayCutout).only(WindowInsetsSides.Horizontal)
             ),
             fabPosition = floatingActionButtonPosition,
