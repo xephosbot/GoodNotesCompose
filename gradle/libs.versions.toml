@@ -2,7 +2,7 @@
 accompanist = "0.37.3"
 androidDesugarJdkLibs = "2.1.5"
 # AGP and tools should be updated together
-androidGradlePlugin = "8.12.0"
+androidGradlePlugin = "8.13.1"
 androidTools = "31.12.0"
 androidxActivity = "1.10.1"
 androidxAppCompat = "1.7.1"
@@ -18,8 +18,7 @@ androidxHiltNavigationCompose = "1.2.0"
 androidxLifecycle = "2.9.2"
 androidxMacroBenchmark = "1.4.0"
 androidxMetrics = "1.0.0-beta02"
-androidxNavigation = "2.9.3"
-nav3Core = "1.0.0-alpha06"
+nav3Core = "1.0.0-alpha10"
 androidxProfileinstaller = "1.4.1"
 androidxTestCore = "1.7.0"
 androidxTestExt = "1.3.0"
@@ -95,8 +94,6 @@ androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navig
 androidx-lifecycle-runtimeCompose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidxLifecycle" }
 androidx-lifecycle-viewModelCompose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "androidxLifecycle" }
 androidx-metrics = { group = "androidx.metrics", name = "metrics-performance", version.ref = "androidxMetrics" }
-androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "androidxNavigation" }
-androidx-navigation-testing = { group = "androidx.navigation", name = "navigation-testing", version.ref = "androidxNavigation" }
 androidx-paging-compose = { module = "androidx.paging:paging-compose", version.ref = "paging" }
 androidx-paging-runtime = { module = "androidx.paging:paging-runtime-ktx", version.ref = "paging" }
 androidx-profileinstaller = { group = "androidx.profileinstaller", name = "profileinstaller", version.ref = "androidxProfileinstaller" }

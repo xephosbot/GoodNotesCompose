@@ -7,7 +7,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import androidx.navigation3.runtime.NavEntryDecorator
-import androidx.navigation3.runtime.navEntryDecorator
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -16,11 +15,13 @@ fun rememberSharedElementNavEntryDecorator(
 ): NavEntryDecorator<Any> = remember { SharedElementNavEntryDecorator(scope) }
 
 @OptIn(ExperimentalSharedTransitionApi::class)
-private fun SharedElementNavEntryDecorator(
+private class SharedElementNavEntryDecorator(
     scope: SharedTransitionScope
-): NavEntryDecorator<Any> = navEntryDecorator { entry ->
-    CompositionLocalProvider(LocalNavSharedElementScope provides scope) { entry.Content() }
-}
+): NavEntryDecorator<Any>(
+    decorate = { entry ->
+        CompositionLocalProvider(LocalNavSharedElementScope provides scope) { entry.Content() }
+    }
+)
 
 @ExperimentalSharedTransitionApi
 val LocalNavSharedElementScope = compositionLocalOf<SharedTransitionScope> {

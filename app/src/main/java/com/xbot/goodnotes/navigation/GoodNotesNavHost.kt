@@ -14,12 +14,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.runtime.entry
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
-import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import androidx.navigation3.ui.rememberSceneSetupNavEntryDecorator
 import com.xbot.goodnotes.ui.feature.detail.NoteDetailScreen
 import com.xbot.goodnotes.ui.feature.detail.NoteDetailViewModel
 import com.xbot.goodnotes.ui.feature.note.NoteScreen
@@ -37,7 +35,7 @@ fun GoodNotesNavHost(
     startDestination: NavKey = Notes
 ) {
     val backStack = rememberNavBackStack(startDestination)
-    val bottomSheetSceneStrategy = remember { BottomSheetSceneStrategy<NavKey>() }
+    val bottomSheetSceneStrategy = remember { BottomSheetSceneStrategy<Any>() }
 
     SharedTransitionLayout {
         NavDisplay(
@@ -46,8 +44,7 @@ fun GoodNotesNavHost(
                 .background(containerColor),
             backStack = backStack,
             entryDecorators = listOf(
-                rememberSceneSetupNavEntryDecorator(),
-                rememberSavedStateNavEntryDecorator(),
+                rememberSaveableStateHolderNavEntryDecorator(),
                 rememberSharedElementNavEntryDecorator(this),
                 rememberViewModelStoreNavEntryDecorator()
             ),
